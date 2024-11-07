@@ -1,5 +1,11 @@
 import { Router } from "express";
 
-const userRoute =Router()
+const userRouter = Router()
 
-export default userRoute
+userRouter.post("/metadata", (req, res) => {
+
+})
+userRouter.post("/metadata/bulk", (req, res) => {
+
+})
+export default userRouter

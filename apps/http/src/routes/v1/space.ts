@@ -1,5 +1,23 @@
 import { Router } from "express";
 
-const spaceRoute =Router()
+const spaceRouter = Router()
 
-export default spaceRoute
+spaceRouter.post("/", (req, res) => {
+
+})
+spaceRouter.delete("/:spaceId", (req, res) => {
+
+})
+spaceRouter.delete("/all", (req, res) => {
+
+})
+spaceRouter.get("/:spaceId", (req, res) => {
+
+})
+spaceRouter.post("/element", (req, res) => {
+
+})
+spaceRouter.delete("/element", (req, res) => {
+
+})
+export default spaceRouter
