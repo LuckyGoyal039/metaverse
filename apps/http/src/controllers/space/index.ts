@@ -1,5 +1,5 @@
-import { Request, Response } from "express"
-import { CreateSpaceSchema } from "../../types"
+import { Request, response, Response } from "express"
+import { CreateSpaceSchema, DeleteElementSchema } from "../../types"
 import client from '@meta/db/client'
 
 
@@ -75,5 +75,42 @@ export const createSpace = async (req: Request, res: Response) => {
         res.json({ spaceId: space.id })
     } catch (err) {
         res.status(400).json({ message: "something went wrong" })
+    }
+}
+
+export const deleteSpace = async (req: Request, res: Response) => {
+    try {
+        const spaceId = DeleteElementSchema.safeParse(req.params.spaceId)
+        if (!spaceId.success) {
+            res.status(400).json({ message: "invalid inputs" })
+            return
+        }
+        const space = await client.space.findUnique({
+            where: {
+                id: req.params.spaceId
+            },
+            select: {
+                creatorId: true
+            }
+        })
+        if (!space) {
+            res.status(400).json({ message: "Unauthorized" })
+            return
+        }
+        if (space?.creatorId != req.userId) {
+            res.status(403).json({ message: "Unauthorized" })
+            return
+        }
+        await client.space.delete({
+            where: {
+                id: req.params.spaceId
+            },
+        })
+        res.json({
+            message: "space deleted"
+        })
+
+    } catch (err) {
+
     }
 }
