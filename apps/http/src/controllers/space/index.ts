@@ -111,6 +111,38 @@ export const deleteSpace = async (req: Request, res: Response) => {
         })
 
     } catch (err) {
+        res.status(500).json({
+            message: "something went wrong"
+        })
 
+    }
+}
+
+export const getMySpace = async (req: Request, res: Response) => {
+    try {
+        const space = await client.space.findMany({
+            where: {
+                creatorId: req.userId
+            },
+            select: {
+                id: true,
+                name: true,
+                width: true,
+                height: true,
+                thumbnail: true
+            }
+        })
+        const result = space.map(ele => {
+            let { width, height, ...rest } = ele
+            let dimensions = `${width}x${height}`
+            return {
+                ...rest,
+                dimensions: dimensions
+            }
+        })
+        res.json(result)
+
+    } catch (err) {
+        res.status(400).json({ message: "Unauthorized" })
     }
 }

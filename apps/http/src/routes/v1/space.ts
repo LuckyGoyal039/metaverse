@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { userMiddleware } from "../../middleware/user";
-import { createSpace, deleteSpace } from "../../controllers/space";
+import { createSpace, deleteSpace, getMySpace } from "../../controllers/space";
 
 const spaceRouter = Router()
 
@@ -8,9 +8,7 @@ spaceRouter.post("/", userMiddleware, createSpace)
 spaceRouter.delete("/:spaceId", (req, res) => {
 
 })
-spaceRouter.delete("/all", (req, res) => {
-
-})
+spaceRouter.delete("/all", userMiddleware, getMySpace)
 spaceRouter.get("/:spaceId", userMiddleware, deleteSpace)
 spaceRouter.post("/element", (req, res) => {
 
