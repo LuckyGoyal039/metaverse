@@ -5,8 +5,8 @@
   "license": "MIT",
   "scripts": {
     "start": "node dist/index.js",
-    "build": "tsc -b"
-  },
+    "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=node --target=node16 --sourcemap" 
+    },
   "dependencies": {
     "@meta/db": "*",
     "bcryptjs": "^2.4.3",
@@ -17,6 +17,7 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/express": "^5.0.0",
-    "@types/jsonwebtoken": "^9.0.7"
-  } 
+    "@types/jsonwebtoken": "^9.0.7",
+    "esbuild": "0.24.0"
+  }
 }
