@@ -15,22 +15,22 @@ datasource db {
 
 model User {
   id       String  @unique @default(cuid())
-  username String
+  username String  @unique
   password String
   role     Role
   Space    Space[]
-  avatar   Avatar  @relation(fields: [avatarId], references: [id])
-  avatarId String
+  avatar   Avatar? @relation(fields: [avatarId], references: [id])
+  avatarId String?
 }
 
 model Space {
-  id        String @unique @default(cuid())
-  name      String
-  width     Int
-  height    Int
-  creatorId String
-  thumbnail String
-  creator   User   @relation(fields: [creatorId], references: [id])
+  id           String         @unique @default(cuid())
+  name         String
+  width        Int
+  height       Int
+  creatorId    String
+  thumbnail    String
+  creator      User           @relation(fields: [creatorId], references: [id])
   SpaceElement SpaceElement[]
 }
 

@@ -1,64 +1,83 @@
 import { Request, Response } from "express"
 import bcrypt from "bcryptjs";
 import client from "@meta/db/client";
+import { SignInSchema, SignUpSchema } from "../../types";
+import jwt from "jsonwebtoken";
 
-export const SignUp = async (req: Request, res: Response) => {
-    const { username, password, role, avatarId } = req.body;
-
+const JWT_SECRET = process.env.JWT_SECRET || "luckygoyal"
+export const SignUp = async (req: Request, res: Response): Promise<void> => {
+    const parseData = SignUpSchema.safeParse(req.body);
+    if (!parseData.success) {
+        res.status(400).json({
+            message: "Invalid Inputs"
+        })
+        return
+    }
     try {
-        // Check if username already exists
+
+        const { username, password, type } = parseData.data
         const existingUser = await client.user.findFirst({
-            where: { username }
+            where: { password }
         });
 
         if (existingUser) {
-            return res.status(400).json({ message: "Username already taken" });
+            res.status(400).json({ message: "Username already taken" });
+            return;
         }
 
-        // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create new user
         const newUser = await client.user.create({
             data: {
                 username,
                 password: hashedPassword,
-                role,
-                avatarId
+                role: type === 'admin' ? "Admin" : "User",
             }
         });
 
-        return res.status(201).json({ message: "User created successfully", userId: newUser.id });
+        res.status(201).json({ userId: newUser.id });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
 
-export const SignIn = async (req: Request, res: Response) => {
-    const { username, password } = req.body;
+export const SignIn = async (req: Request, res: Response): Promise<void> => {
+    const parseData = SignInSchema.safeParse(req.body);
+
+    if (!parseData.success) {
+        res.status(400).json({ message: "Invalid Inputs" });
+        return;
+    }
 
     try {
+        const { username, password } = parseData.data;
+
         // Find the user by username
         const user = await client.user.findFirst({
             where: { username }
         });
 
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            res.status(404).json({ message: "User not found" });
+            return;
         }
 
         // Check if the password is correct
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {
-            return res.status(401).json({ message: "Invalid credentials" });
+            res.status(401).json({ message: "Invalid credentials" });
+            return;
         }
+        const token = jwt.sign({ userId: user.id, username: user.username },
+            JWT_SECRET
+        )
 
-        return res.status(200).json({ message: "Login successful", userId: user.id });
+        res.status(200).json({ token });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({ message: "Internal server error" });
     }
 };

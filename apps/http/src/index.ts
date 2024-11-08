@@ -3,6 +3,7 @@ import client from "@meta/db/client"
 import router from './routes/v1'
 const app = express()
 
+express.json()
 app.use("api/v1",router)
 
 app.listen(3000, () => {
