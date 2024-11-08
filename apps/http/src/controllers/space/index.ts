@@ -1,5 +1,5 @@
 import { Request, response, Response } from "express"
-import { CreateSpaceSchema, DeleteElementSchema } from "../../types"
+import { AddElementSchema, CreateSpaceSchema, DeleteElementSchema } from "../../types"
 import client from '@meta/db/client'
 
 
@@ -144,5 +144,114 @@ export const getMySpace = async (req: Request, res: Response) => {
 
     } catch (err) {
         res.status(400).json({ message: "Unauthorized" })
+    }
+}
+
+export const createElement = async (req: Request, res: Response) => {
+    try {
+        const parseData = AddElementSchema.safeParse(req.body)
+        if (!parseData.success) {
+            res.status(400).json({ message: "invalid inputs" })
+            return
+        }
+        const space = await client.space.findUnique({
+            where: {
+                creatorId: req.userId,
+                id: parseData.data.spaceId
+            }
+        })
+        if (!space) {
+            res.status(400).json({ message: "space not found" })
+            return
+        }
+        await client.spaceElement.create({
+            data: {
+                x: parseData.data.x,
+                y: parseData.data.y,
+                spaceId: parseData.data.spaceId,
+                elementId: parseData.data.elementId
+            }
+        })
+        res.json({
+            message: "element created"
+        })
+    } catch (err) {
+        res.status(400).json({
+            message: "something went wrong"
+        })
+    }
+}
+export const deleteElement = async (req: Request, res: Response) => {
+    try {
+        const elementId = DeleteElementSchema.safeParse(req.body)
+        if (!elementId.success) {
+            res.status(400).json({ message: "invalid inputs" })
+        }
+        const spaceElement = await client.spaceElement.findFirst({
+            where: {
+                id: elementId.data?.id
+            }
+        })
+        if (!spaceElement) {
+            res.status(400).json({ message: "element not found" })
+            return
+        }
+        await client.spaceElement.delete({
+            where: {
+                id: elementId.data?.id
+            }
+        })
+        res.json({
+            message: "element deleted"
+        })
+    } catch (err) {
+        res.status(400).json({
+            message: "something went wrong"
+        })
+    }
+}
+
+export const getSpace = async (req: Request, res: Response) => {
+    try {
+        const spaceId = req.params.spaceId
+        const space = await client.space.findUnique({
+            where: {
+                id: spaceId
+            },
+            include: {
+                SpaceElement: {
+                    include: {
+                        element: true
+                    }
+                }
+            }
+        })
+        if (!space) {
+            res.status(400).json({
+                message: "space not found"
+            })
+        }
+
+        res.json({
+            "dimensions": `${space?.width}x${space?.height}`,
+            "elements": space?.SpaceElement.map(ele => {
+                return {
+                    id: ele.id,
+                    element: {
+                        id: ele.element.id,
+                        imageUrl: ele.element.image,
+                        height: ele.element.height,
+                        width: ele.element.width,
+                        static: ele.element.static
+                    },
+                    x: ele.x,
+                    y: ele.y
+                }
+            })
+        })
+    } catch (err) {
+        res.status(400).json({
+            message: "space not found"
+        })
     }
 }
