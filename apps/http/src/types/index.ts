@@ -45,14 +45,22 @@ export const CreateAvatarSchema = z.object({
 export const CreateMapSchema = z.object({
     thumbnail: z.string(),
     dimensions: z.string(),
-    name:z.string(),
-    defaultElements:z.array(
+    name: z.string(),
+    defaultElements: z.array(
         z.object({
             elementId: z.string(),
-            x:z.number(),
-            y:z.number(),
+            x: z.number(),
+            y: z.number(),
         })
     )
 })
 
+
+declare global {
+    namespace Express {
+        interface Request {
+            userId?: string
+        }
+    }
+}
 

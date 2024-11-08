@@ -71,7 +71,7 @@ export const SignIn = async (req: Request, res: Response): Promise<void> => {
             res.status(401).json({ message: "Invalid credentials" });
             return;
         }
-        const token = jwt.sign({ userId: user.id, username: user.username },
+        const token = jwt.sign({ userId: user.id, username: user.username, role: user.role },
             JWT_SECRET
         )
 
