@@ -1,9 +1,10 @@
-import Header from "../../component/header";
+
+import LandingHeader from "../../component/landingHeader";
 
 function Landing() {
     return (
         <>
-            <Header />
+            <LandingHeader />
             <p>Landing page body</p>
         </>
     )

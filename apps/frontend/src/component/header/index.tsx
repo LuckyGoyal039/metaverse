@@ -1,31 +1,45 @@
 import React, { useState } from 'react';
 import avatar60 from '../../assets/avatar_60_dancing.png'
-const Header: React.FC = () => {
+import WorkspacesIcon from '@mui/icons-material/Workspaces';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import mainLogo from '../../assets/main_logo.png'
+interface HeaderProps {
+  tab: string
+  setTab: React.Dispatch<React.SetStateAction<string>>;
+}
+const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [EditNameOpen, setEditNameOpen] = useState(false);
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
   };
+  const toggleEditName = () => {
+    setEditNameOpen(!EditNameOpen)
+  }
 
   return (
     <header>
-      <nav className="bg-[#2B2D42] px-4 lg:px-6 py-5">
-        <div className="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl">
+      <nav className="bg-[#333a64] py-3">
+        <div className="flex flex-wrap justify-between items-center px-8">
           {/* Logo Section */}
           <div className="flex items-center space-x-6">
             <a href="/" className="flex items-center">
-              <div className="bg-[#4F5DE4] p-2 rounded-lg">
-                <svg className="h-6 w-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
-                </svg>
-              </div>
+              <img src={mainLogo} alt="metaverse" className='w-14 h-14' />
             </a>
 
             {/* Navigation Items */}
             <div className="hidden lg:flex items-center space-x-6">
-              <a href="/events" className="text-white hover:text-gray-300">Events</a>
-              <a href="/spaces" className="text-white hover:text-gray-300">My Spaces</a>
+              <button type='button' className={`flex gap-2 items-center font-bold text-white px-5 py-2 rounded-lg hover:bg-[#4c5381] ${tab == 'event' ? 'bg-[#4c5381] ' : ''}`} onClick={() => setTab("event")}>
+                <CalendarMonthIcon className='!w-4 !h-4' />
+                <span className="align-middle">Events</span>
+              </button>
+              <button type='button' className={`flex gap-2 items-center font-bold text-white px-5 py-2 rounded-lg hover:bg-[#4c5381] ${tab == 'space' ? 'bg-[#4c5381] ' : ''}`} onClick={() => setTab("space")}>
+                <WorkspacesIcon className='!w-4 !h-4' />
+                <span className="align-middle">My Spaces</span>
+              </button>
             </div>
           </div>
 
@@ -39,7 +53,7 @@ const Header: React.FC = () => {
               >
                 <div className="w-8 h-8 bg-black rounded-full overflow-hidden">
                   {/* Avatar image */}
-                  <img src={avatar60} alt="avatar" className='w-11 h-11 rounded-full'/>
+                  <img src={avatar60} alt="avatar" className='w-11 h-11 rounded-full' />
                 </div>
                 <span className="hidden lg:inline-block">lucky</span>
               </button>
@@ -47,9 +61,11 @@ const Header: React.FC = () => {
               {profileOpen && (
                 <div className="absolute right-0 mt-2 w-64 rounded-lg shadow-lg bg-[#454d7b] ring-1 ring-black ring-opacity-5">
                   <div className="p-4">
-                    <div className="text-white font-medium mb-1">Profile</div>
-                    <div className="text-lg text-white font-semibold mb-1">lucky</div>
-                    <div className="text-gray-400 text-sm mb-4">wadid47349@inikale.com</div>
+                    <div onClick={toggleEditName}>
+                      <div className="text-white font-medium mb-1">Profile</div>
+                      <div className="text-lg text-white font-semibold mb-1">lucky</div>
+                      <div className="text-gray-400 text-sm mb-4">wadid47349@inikale.com</div>
+                    </div>
 
                     <div className="space-y-2">
                       <button className="w-full text-left flex items-center space-x-3 text-white hover:bg-gray-700 p-2 rounded-lg">
@@ -72,8 +88,11 @@ const Header: React.FC = () => {
             </div>
 
             {/* Create Event Button */}
-            <button className="bg-[#00C4B8] text-white px-4 py-2 rounded-lg hover:bg-[#00a89d]">
-              Create Event
+            <button className="flex items-center gap-2 font-semibold text-[#282d4e] bg-[#06d6a0] hover:bg-[#76dbc4] px-6 py-2 rounded-lg hover:bg-[#00a89d]">
+              <AddCircleIcon />
+              <span>
+                Create Space
+              </span>
             </button>
 
 
