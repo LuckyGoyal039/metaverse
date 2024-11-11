@@ -2,6 +2,7 @@
 import FeaturesList from "../../component/featureList";
 import FlexCard from "../../component/flexCard";
 import LandingHeader from "../../component/landingHeader";
+import TestimonialCard from "../../component/testimonial";
 import VideoPlayer from "../../component/vedioPlayer";
 
 function Landing() {
@@ -26,6 +27,35 @@ function Landing() {
             headingTwo: "Meet in the moment",
             text: "Collaborate in the moment or schedule team meetings to keep everyone aligned and work moving forward.",
             reverse: false
+        },
+    ]
+    const testimonialList = [
+        {
+            profileImage: "https://cdn.prod.website-files.com/640f99c52b298c7753381c38/6707e52de54e1c296a0ef863_daniel-tobon-profile.jpeg",
+            name: "Mike Mengell",
+            title: "CTO and Co-Founder of CTO Labs",
+            officeImage: "https://cdn.prod.website-files.com/640f99c52b298c7753381c38/671bb6eb14ee1ce0e7552c79_Daniel-Tobon-Feature-Card-2x.png",
+            testimonial: "Team culture happens in the moments between meetings and we were hungry to get back into that norm. When we found Gather we instantly fell in love with it.",
+            linkText: "Read Customer Story",
+            linkUrl: "#",
+        },
+        {
+            profileImage: "https://cdn.prod.website-files.com/640f99c52b298c7753381c38/6707e52de54e1c296a0ef863_daniel-tobon-profile.jpeg",
+            name: "Mike Mengell",
+            title: "CTO and Co-Founder of CTO Labs",
+            officeImage: "https://cdn.prod.website-files.com/640f99c52b298c7753381c38/671bb6eb14ee1ce0e7552c79_Daniel-Tobon-Feature-Card-2x.png",
+            testimonial: "Team culture happens in the moments between meetings and we were hungry to get back into that norm. When we found Gather we instantly fell in love with it.",
+            linkText: "Read Customer Story",
+            linkUrl: "#",
+        },
+        {
+            profileImage: "https://cdn.prod.website-files.com/640f99c52b298c7753381c38/6707e52de54e1c296a0ef863_daniel-tobon-profile.jpeg",
+            name: "Mike Mengell",
+            title: "CTO and Co-Founder of CTO Labs",
+            officeImage: "https://cdn.prod.website-files.com/640f99c52b298c7753381c38/671bb6eb14ee1ce0e7552c79_Daniel-Tobon-Feature-Card-2x.png",
+            testimonial: "Team culture happens in the moments between meetings and we were hungry to get back into that norm. When we found Gather we instantly fell in love with it.",
+            linkText: "Read Customer Story",
+            linkUrl: "#",
         },
     ]
     return (
@@ -63,6 +93,47 @@ function Landing() {
                 </div>
             </div>
 
+            <div className="pt-20">
+                <div className="flex justify-center">
+                    <h2 className="text-[3rem] font-bold text-white text-center w-[700px]">
+                        Why distributed teams love Gather
+                    </h2>
+                </div>
+                <div className="flex gap-5 justify-center mt-16">
+                    {
+                        testimonialList.map(ele => {
+                            return (
+                                <TestimonialCard
+                                    profileImage={ele.profileImage}
+                                    name={ele.name}
+                                    title={ele.title}
+                                    officeImage={ele.officeImage}
+                                    testimonial={ele.testimonial}
+                                    linkText={ele.linkText}
+                                    linkUrl={ele.linkText}
+                                />
+                            )
+                        })
+                    }
+
+                </div>
+                <div className="text-center mt-16   ">
+                    <button className="bg-blue-600 hover:bg-blue-700 px-5 py-3 text-white rounded-lg">View More Testimonials</button>
+                </div>
+            </div>
+            <div className="mt-20">
+                <div className="rounded-xl flex justify-center">
+                    <VideoPlayer src={"https://cdn.vidzflow.com/v/MB29PHd9nF_1080p_1691443966.mp4"} />
+                </div>
+                <div className="flex justify-center mt-14">
+                    <h2 className="text-[3rem] font-bold text-white text-center">
+                        Build a culture your remote team loves
+                    </h2>
+                </div>
+                <div className="text-center mt-16">
+                    <button className="bg-blue-600 hover:bg-blue-700 px-5 py-3 text-white rounded-lg">Get Started</button>
+                </div>
+            </div>
         </>
     )
 }
