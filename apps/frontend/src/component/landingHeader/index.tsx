@@ -1,8 +1,8 @@
 import React from 'react';
-import avatar60 from '../../assets/avatar_60_dancing.png'
-import WorkspacesIcon from '@mui/icons-material/Workspaces';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
+// import avatar60 from '../../assets/avatar_60_dancing.png'
+// import WorkspacesIcon from '@mui/icons-material/Workspaces';
+// import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+// import AddCircleIcon from '@mui/icons-material/AddCircle';
 import mainLogo from '../../assets/main_logo.png'
 import CustomDropdown from '../customDropdown';
 
