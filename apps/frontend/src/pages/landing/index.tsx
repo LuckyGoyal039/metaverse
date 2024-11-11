@@ -1,6 +1,7 @@
 
 import FeaturesList from "../../component/featureList";
 import FlexCard from "../../component/flexCard";
+import Footer from "../../component/footer";
 import LandingHeader from "../../component/landingHeader";
 import TestimonialCard from "../../component/testimonial";
 import VideoPlayer from "../../component/vedioPlayer";
@@ -133,6 +134,9 @@ function Landing() {
                 <div className="text-center mt-16">
                     <button className="bg-blue-600 hover:bg-blue-700 px-5 py-3 text-white rounded-lg">Get Started</button>
                 </div>
+            </div>
+            <div className="mt-20">
+                <Footer />
             </div>
         </>
     )
