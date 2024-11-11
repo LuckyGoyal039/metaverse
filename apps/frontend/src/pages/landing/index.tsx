@@ -1,4 +1,5 @@
 
+import FeaturesList from "../../component/featureList";
 import FlexCard from "../../component/flexCard";
 import LandingHeader from "../../component/landingHeader";
 import VideoPlayer from "../../component/vedioPlayer";
@@ -50,6 +51,18 @@ function Landing() {
                     })
                 }
             </div>
+
+            <div className="flex pt-24 flex-col w-full">
+                <div className="flex justify-center">
+                    <h2 className="text-[3rem] font-bold text-white text-center w-[700px]">
+                        Everything remote teams need to get work done
+                    </h2>
+                </div>
+                <div className="flex justify-center mt-20">
+                    <FeaturesList />
+                </div>
+            </div>
+
         </>
     )
 }
