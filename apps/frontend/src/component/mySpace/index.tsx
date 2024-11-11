@@ -6,7 +6,6 @@ const MySpace: React.FC = () => {
     const [data, _] = useState(false)
     return (
         <>
-            <h1>my spaces</h1>
             {
                 !data &&
                 <div className="w-full h-[85vh] flex items-center justify-center">

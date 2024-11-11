@@ -14,7 +14,6 @@ function Home() {
             {
                 tab == "space" ? <MySpace /> : null
             }
-            <p>{tab}</p>
         </>
     )
 }
