@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import {useNavigate} from 'react-router-dom';
 import avatar60 from '../../assets/avatar_60_dancing.png';
 
 interface FormData {
@@ -7,6 +8,7 @@ interface FormData {
 }
 
 const Signin: React.FC = () => {
+    const navigate=useNavigate();
     const [formData, setFormData] = useState<FormData>({
         username: '',
         password: '',
@@ -20,11 +22,35 @@ const Signin: React.FC = () => {
         });
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Handle form submission here
-        console.log('Form Data:', formData);
+        const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL;
+        const url = `${HTTP_SERVER_URL}/signin`;
+
+        try {
+            const res = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData), 
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json(); 
+                console.error("Error during sign-in:", errorData);
+                return;
+            }
+
+            const user = await res.json();
+            localStorage.setItem('token', user.token);
+            return navigate('/app');
+        } catch (error) {
+            console.error("Network error during sign-in:", error);
+        }
     };
+
 
     return (
         <section className="bg-gray-50 dark:bg-gray-900">
@@ -70,7 +96,7 @@ const Signin: React.FC = () => {
                             </div>
                             <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Sign In</button>
                             <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                                Don't have an account? <a href="/signup" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Sign up here</a>
+                                Don't have an account? <a href="/signup" className="font-medium text-primary-600 hover:underline dark:text-primary-500 text-blue-500">Sign up here</a>
                             </p>
                         </form>
                     </div>

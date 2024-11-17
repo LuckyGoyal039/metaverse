@@ -44,6 +44,7 @@ export const SignUp = async (req: Request, res: Response): Promise<void> => {
 
 
 export const SignIn = async (req: Request, res: Response): Promise<void> => {
+
     const parseData = SignInSchema.safeParse(req.body);
 
     if (!parseData.success) {

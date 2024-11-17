@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import avatar60 from '../../assets/avatar_60_dancing.png'
+import { useNavigate } from 'react-router-dom';
 interface FormData {
   username: string;
   password: string;
@@ -7,6 +8,7 @@ interface FormData {
 }
 
 const Signup: React.FC = () => {
+  const navigate = useNavigate()
   const [formData, setFormData] = useState<FormData>({
     username: '',
     password: '',
@@ -21,10 +23,32 @@ const Signup: React.FC = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log('Form Data:', formData);
+    const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL;
+    const url = `${HTTP_SERVER_URL}/signup`;
+
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error("Error during sign-in:", errorData);
+        return;
+      }
+
+      const user = await res.json();
+      return navigate('/signin');
+    } catch (error) {
+      console.error("Network error during sign-in:", error);
+    }
   };
 
   return (
@@ -40,7 +64,7 @@ const Signup: React.FC = () => {
               Sign Up
             </h1>
             <h6 className='font-bold text-gray-900 dark:text-white'>
-            Create Your Virtual Reality Today!
+              Create Your Virtual Reality Today!
             </h6>
             <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
               <div>
@@ -86,7 +110,7 @@ const Signup: React.FC = () => {
               <button type="submit" className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none dark:focus:ring-red-800">Back to Home</button>
               <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Submit</button>
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                Already have an account? <a href="/signup" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Login here</a>
+                Already have an account? <a href="/signin" className="font-medium text-primary-600 hover:underline dark:text-primary-500 text-blue-500">Login here</a>
               </p>
             </form>
           </div>

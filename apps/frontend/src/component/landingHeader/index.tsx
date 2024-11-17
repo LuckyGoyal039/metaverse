@@ -77,12 +77,17 @@ const LandingHeader: React.FC = () => {
                         <div className='text-white'>
                             <p>Contact Sales</p>
                         </div>
-                        <div className='font-semibold text-[#282d4e] bg-[#06d6a0] hover:bg-[#76dbc4] px-6 py-2 rounded-lg hover:bg-[#00a89d]'>
-                            <p>Get Started</p>
-                        </div>
-                        <div className='font-semibold text-[#282d4e] bg-[#ebeeff] hover:bg-[#c9cde0] px-6 py-2 rounded-lg hover:bg-[#00a89d]'>
-                            <p>Sign In</p>
-                        </div>
+
+                        <a href="/signin" >
+                            <button className='font-semibold text-[#282d4e] bg-[#00a89d] hover:bg-[#76dbc4] px-6 py-2 rounded-lg cursor-pointer'>
+                                Get Started
+                            </button>
+                        </a>
+                        <a href="/signin" >
+                            <button className='font-semibold text-[#282d4e] bg-[#ebeeff] hover:bg-[#c9cde0] px-6 py-2 rounded-lg cursor-pointer'>
+                                Sign In
+                            </button>
+                        </a>
                     </div>
                 </div>
             </nav>
