@@ -53,3 +53,19 @@ export const getBulkAvatarData = async (req: Request, res: Response) => {
         res.status(500).json({ message: "something went wrong" })
     }
 }
+
+export const SignoUT = async (req: Request, res: Response) => {
+    try {
+        const { token } = req.body
+        console.log("jwt token: ", token)
+        res.json({
+            message: "sign out successfully"
+        })
+    } catch {
+        console.log("Something went wrong")
+        res.status(500).json({
+            message: "Something went wrong"
+        })
+
+    }
+}
