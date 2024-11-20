@@ -13,9 +13,10 @@ export const adminMiddleware = async (req: Request, res: Response, next: NextFun
     try {
         const SECRET_KEY = process.env.JWT_SECRET || ""
         const decode = jwt.verify(token, SECRET_KEY) as { userId: string, username: string, role: string }
-        if (decode.role == "admin") {
-            req.userId = decode.userId
+        if (decode.role != "admin") {
+            throw Error("Unauthorized")
         }
+        req.userId = decode.userId
         next()
 
     } catch (err) {

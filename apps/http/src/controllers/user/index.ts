@@ -4,7 +4,7 @@ import client from "@meta/db/client";
 import { SignInSchema, SignUpSchema } from "../../types";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "luckygoyal"
+const JWT_SECRET = process.env.JWT_SECRET || ""
 export const SignUp = async (req: Request, res: Response): Promise<void> => {
     const parseData = SignUpSchema.safeParse(req.body);
     if (!parseData.success) {
@@ -72,6 +72,7 @@ export const SignIn = async (req: Request, res: Response): Promise<void> => {
             res.status(401).json({ message: "Invalid credentials" });
             return;
         }
+        console.log("jwt secret during signin: ", JWT_SECRET)
         const token = jwt.sign({ userId: user.id, username: user.username, role: user.role },
             JWT_SECRET
         )

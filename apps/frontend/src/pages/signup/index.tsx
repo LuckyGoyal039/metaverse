@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import avatar60 from '../../assets/avatar_60_dancing.png'
 import { useNavigate } from 'react-router-dom';
+import Spinner from '../../component/spinner';
 interface FormData {
   username: string;
   password: string;
@@ -14,6 +15,7 @@ const Signup: React.FC = () => {
     password: '',
     type: '',
   });
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -26,6 +28,7 @@ const Signup: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true)
     const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL;
     const url = `${HTTP_SERVER_URL}/signup`;
 
@@ -48,6 +51,8 @@ const Signup: React.FC = () => {
       return navigate('/signin');
     } catch (error) {
       console.error("Network error during sign-in:", error);
+    } finally {
+      setIsLoading(false)
     }
   };
 
@@ -107,8 +112,11 @@ const Signup: React.FC = () => {
                   <option value="admin">Admin</option>
                 </select>
               </div>
-              <button type="submit" className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none dark:focus:ring-red-800">Back to Home</button>
-              <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Submit</button>
+              <a href='/'>
+
+                <button type="button" className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none dark:focus:ring-red-800">Back to Home</button>
+              </a>
+              <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">{isLoading ? <Spinner /> : "Submit"}</button>
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                 Already have an account? <a href="/signin" className="font-medium text-primary-600 hover:underline dark:text-primary-500 text-blue-500">Login here</a>
               </p>

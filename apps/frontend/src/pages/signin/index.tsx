@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import avatar60 from '../../assets/avatar_60_dancing.png';
+import Spinner from '../../component/spinner';
 
 interface FormData {
     username: string;
@@ -8,11 +9,12 @@ interface FormData {
 }
 
 const Signin: React.FC = () => {
-    const navigate=useNavigate();
+    const navigate = useNavigate();
     const [formData, setFormData] = useState<FormData>({
         username: '',
         password: '',
     });
+    const [isLoading, setIsLoading] = useState(false)
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -25,6 +27,7 @@ const Signin: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setIsLoading(true)
         const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL;
         const url = `${HTTP_SERVER_URL}/signin`;
 
@@ -34,11 +37,11 @@ const Signin: React.FC = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(formData), 
+                body: JSON.stringify(formData),
             });
 
             if (!res.ok) {
-                const errorData = await res.json(); 
+                const errorData = await res.json();
                 console.error("Error during sign-in:", errorData);
                 return;
             }
@@ -48,6 +51,8 @@ const Signin: React.FC = () => {
             return navigate('/app');
         } catch (error) {
             console.error("Network error during sign-in:", error);
+        } finally {
+            setIsLoading(false)
         }
     };
 
@@ -94,7 +99,7 @@ const Signin: React.FC = () => {
                                     required
                                 />
                             </div>
-                            <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Sign In</button>
+                            <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700"> {isLoading ? <Spinner/> : "Sign In"}</button>
                             <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                                 Don't have an account? <a href="/signup" className="font-medium text-primary-600 hover:underline dark:text-primary-500 text-blue-500">Sign up here</a>
                             </p>

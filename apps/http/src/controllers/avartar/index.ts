@@ -1,7 +1,8 @@
 import { Request, Response } from "express"
 import { UpdateMetaDataSchema } from "../../types"
-
 import client from '@meta/db/client'
+
+
 export const updateAvatar = async (req: Request, res: Response) => {
     try {
         const parseData = UpdateMetaDataSchema.safeParse(req.body)
@@ -63,6 +64,25 @@ export const SignoUT = async (req: Request, res: Response) => {
         })
     } catch {
         console.log("Something went wrong")
+        res.status(500).json({
+            message: "Something went wrong"
+        })
+
+    }
+}
+export const getUserInfo = async (req: Request, res: Response) => {
+    try {
+        const userId = req.userId
+        console.log("userId: ", userId)
+        const user = await client.user.findUnique({
+            where: {
+                id: userId
+            }
+        })
+        console.log(user)
+        res.json(user)
+    } catch(err) {
+        console.log("Something went wrong: ",err)
         res.status(500).json({
             message: "Something went wrong"
         })
