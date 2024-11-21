@@ -12,13 +12,10 @@ export const userMiddleware = async (req: Request, res: Response, next: NextFunc
     }
     try {
         const SECRET_KEY = process.env.JWT_SECRET || ""
-        console.log(SECRET_KEY)
         const decode = jwt.verify(token, SECRET_KEY) as { userId: string, username: string, role: string }
-        console.log(decode)
         req.userId = decode.userId
         next()
     } catch (err) {
-        console.log(err)
         res.status(401).json({ message: "Unauthorized" })
         return
     }

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import avatar60 from '../../assets/avatar_60_dancing.png';
 import Spinner from '../../component/spinner';
+import { toast, ToastContainer } from 'react-toastify';
 
 interface FormData {
     username: string;
@@ -41,15 +42,27 @@ const Signin: React.FC = () => {
             });
 
             if (!res.ok) {
+                toast.error("Invalid Credentials", {
+                    position: "top-center"
+                })
                 const errorData = await res.json();
                 console.error("Error during sign-in:", errorData);
                 return;
             }
+            toast.success("Signin Successfully", {
+                position: "top-center"
+            })
 
             const user = await res.json();
             localStorage.setItem('token', user.token);
-            return navigate('/app');
+            setTimeout(() => {
+                navigate('/app');
+            }, 2000)
+
         } catch (error) {
+            toast.error("Invalid Credentials", {
+                position: "top-center"
+            })
             console.error("Network error during sign-in:", error);
         } finally {
             setIsLoading(false)
@@ -59,6 +72,7 @@ const Signin: React.FC = () => {
 
     return (
         <section className="bg-gray-50 dark:bg-gray-900">
+            <ToastContainer />
             <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
                 <a href="#" className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
                     <img className="w-8 h-8 mr-2" src={avatar60} alt="logo" />
@@ -99,7 +113,7 @@ const Signin: React.FC = () => {
                                     required
                                 />
                             </div>
-                            <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700"> {isLoading ? <Spinner/> : "Sign In"}</button>
+                            <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700"> {isLoading ? <Spinner /> : "Sign In"}</button>
                             <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                                 Don't have an account? <a href="/signup" className="font-medium text-primary-600 hover:underline dark:text-primary-500 text-blue-500">Sign up here</a>
                             </p>

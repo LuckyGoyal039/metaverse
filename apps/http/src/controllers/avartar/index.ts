@@ -73,13 +73,11 @@ export const SignoUT = async (req: Request, res: Response) => {
 export const getUserInfo = async (req: Request, res: Response) => {
     try {
         const userId = req.userId
-        console.log("userId: ", userId)
         const user = await client.user.findUnique({
             where: {
                 id: userId
             }
         })
-        console.log(user)
         res.json(user)
     } catch(err) {
         console.log("Something went wrong: ",err)

@@ -4,11 +4,17 @@ import WorkspacesIcon from '@mui/icons-material/Workspaces';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import mainLogo from '../../assets/main_logo.png'
+import { Toast } from 'flowbite-react';
+import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 interface HeaderProps {
   tab: string
   setTab: React.Dispatch<React.SetStateAction<string>>;
 }
 const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [EditNameOpen, setEditNameOpen] = useState(false);
@@ -20,32 +26,40 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
     setEditNameOpen(!EditNameOpen)
   }
   const handleSignOut = async () => {
-
-    const token = localStorage.getItem('token');
-    localStorage.removeItem('token');
-    const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL
-    const url = `${HTTP_SERVER_URL}/sign-out`
-    await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(token)
-    })
+    try {
+      const token = localStorage.getItem('token');
+      localStorage.removeItem('token');
+      const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL
+      const url = `${HTTP_SERVER_URL}/sign-out`
+      await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(token)
+      })
+      toast.success("Signout Successfully", {
+        position: "top-center"
+      });
+      setTimeout(() => {
+        navigate('/signin')
+      }, 2000)
+    } catch (err) {
+      toast.error("Something went wrong. Unable to sign out", {
+        position: "top-center"
+      })
+    }
   }
 
   return (
     <header>
       <nav className="bg-[#333a64] py-3">
         <div className="flex flex-wrap justify-between items-center px-8">
-          {/* Logo Section */}
           <div className="flex items-center space-x-6">
             <a href="/" className="flex items-center">
               <img src={mainLogo} alt="metaverse" className='w-14 h-14' />
             </a>
-
-            {/* Navigation Items */}
             <div className="hidden lg:flex items-center space-x-6">
               <button type='button' className={`flex gap-2 items-center font-bold text-white px-5 py-2 rounded-lg hover:bg-[#4c5381] ${tab == 'event' ? 'bg-[#4c5381] ' : ''}`} onClick={() => setTab("event")}>
                 <CalendarMonthIcon className='!w-4 !h-4' />
@@ -58,9 +72,7 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
             </div>
           </div>
 
-          {/* Right Side Items */}
           <div className="flex items-center space-x-4">
-            {/* Profile Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
@@ -102,7 +114,6 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
               )}
             </div>
 
-            {/* Create Event Button */}
             <button className="flex items-center gap-2 font-semibold text-[#282d4e] bg-[#06d6a0] hover:bg-[#76dbc4] px-6 py-2 rounded-lg hover:bg-[#00a89d]">
               <AddCircleIcon />
               <span>
@@ -110,9 +121,6 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
               </span>
             </button>
 
-
-
-            {/* Mobile Menu Button */}
             <button
               onClick={toggleMenu}
               className="inline-flex items-center p-2 ml-1 text-sm text-gray-400 rounded-lg lg:hidden hover:bg-gray-700 focus:outline-none"
@@ -134,7 +142,6 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {menuOpen && (
           <div className="lg:hidden mt-4">
             <ul className="flex flex-col space-y-2">
@@ -152,6 +159,7 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
           </div>
         )}
       </nav>
+      <ToastContainer />
     </header>
   );
 };
