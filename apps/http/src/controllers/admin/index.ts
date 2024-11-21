@@ -4,12 +4,13 @@ import client from '@meta/db/client'
 
 export const CreateNewElement = async (req: Request, res: Response) => {
     try {
+        console.log("start element create...");
         const parseData = CreateElementSchema.safeParse(req.body)
         if (!parseData.success) {
             res.status(400).json({ message: "invalid inputs" })
             return
         }
-
+        console.log("parseData: ", parseData);
         const element = await client.element.create({
             data: {
                 image: parseData.data?.imageUrl,
@@ -18,6 +19,7 @@ export const CreateNewElement = async (req: Request, res: Response) => {
                 static: parseData.data?.static
             }
         })
+        console.log("element created: ", element);
         if (!element) {
             res.status(400).json({ message: "unable to create element" })
             return

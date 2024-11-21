@@ -78,9 +78,9 @@ const LandingHeader: React.FC = () => {
                             <p>Contact Sales</p>
                         </div>
 
-                        <a href="/signin" >
+                        <a href="/demo" >
                             <button className='font-semibold text-[#282d4e] bg-[#00a89d] hover:bg-[#76dbc4] px-6 py-2 rounded-lg cursor-pointer'>
-                                Get Started
+                                Try Demo
                             </button>
                         </a>
                         <a href="/signin" >

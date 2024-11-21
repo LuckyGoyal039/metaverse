@@ -3,11 +3,13 @@ import Header from "../../component/header";
 import Events from "../../component/events";
 import MySpace from "../../component/mySpace";
 import WaitingPage from "../../component/waiting";
+import { ToastContainer } from "react-toastify";
+// import { CreateElementDataSchema, CreateElementFunctionSchema } from "../../types";
 
 function Home() {
     const [tab, setTab] = useState('event')
     const [user, setUser] = useState();
-    const [err, setErr] = useState('')
+    const [_, setErr] = useState('')
     const getUserInfo = async () => {
         try {
             const token = localStorage.getItem('token');
@@ -20,6 +22,7 @@ function Home() {
                 }
             })
             const respJson = await resp.json()
+            console.log(user)
             setUser(respJson)
         } catch (err) {
             console.log(err);
@@ -27,11 +30,13 @@ function Home() {
         }
     }
 
+
     useEffect(() => {
         getUserInfo()
-    })
+    }, [])
     return (
         <>
+            <ToastContainer />
             <Header tab={tab} setTab={setTab} />
             {
                 tab == "event" ? <Events /> : null
@@ -39,7 +44,7 @@ function Home() {
             {
                 tab == "space" ? <MySpace /> : null
             }
-            {/* <WaitingPage/> */}
+            <WaitingPage/>
         </>
     )
 }
