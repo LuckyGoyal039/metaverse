@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import { CreateAvatarDataSchema, CreateElementDataSchema, CreateMapDataSchema, CreateSpaceDataSchema, CustomModalProps } from "../../types";
+import CustomDropdownWithImage from "../customDropdown/dropdownWithImage";
 
 
 const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMapDataSchema | CreateAvatarDataSchema | CreateSpaceDataSchema
@@ -24,19 +25,30 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
         thumbnail: "",
         dimensions: "",
         name: "",
-        defaultElement: []
+        defaultElements: [{ elementId: "", x: 0, y: 0 }]
     });
+    const [elementList, setElementList] = useState([])
+    const [selectedElementId, setSelectedElementId] = useState<string | null>(
+        null
+    );
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
         const isChecked = (type === "checkbox") ? e.target.checked : undefined
 
-        console.log(setCreateAvatarForm)
         setCreateElementForm((prev) => ({
             ...prev,
             [name]: type === "checkbox" ? isChecked : type === "number" ? Number(value) : value,
         }));
     };
 
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setCreateAvatarForm((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
     const handleSpaceChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setCreateSpaceForm((prev) => ({
@@ -51,6 +63,7 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
             [name]: value,
         }));
     };
+
     const handleDefaultElementChange = (
         e: React.ChangeEvent<HTMLInputElement>,
         index: number,
@@ -58,20 +71,46 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
     ) => {
         const value = field === "elementId" ? e.target.value : Number(e.target.value);
         setCreateMapForm((prev) => {
-            const updatedElements = [...prev.defaultElement];
+            const updatedElements = [...prev.defaultElements];
             updatedElements[index] = { ...updatedElements[index], [field]: value };
-            return { ...prev, defaultElement: updatedElements };
+            return { ...prev, defaultElements: updatedElements };
         });
     };
 
+    const handleDropdownChange = (id: string, index: number) => {
+        setCreateMapForm((prev) => {
+            const updatedElements = [...prev.defaultElements];
+            updatedElements[index] = { ...updatedElements[index], elementId: id };
+            return { ...prev, defaultElements: updatedElements };
+        });
+    };
 
     const addDefaultElement = () => {
         setCreateMapForm((prev) => ({
             ...prev,
-            defaultElement: [...prev.defaultElement, { elementId: "", x: 0, y: 0 }],
+            defaultElements: [...prev.defaultElements, { elementId: "", x: 0, y: 0 }],
         }));
     };
-
+    const getAllElements = async () => {
+        try {
+            const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL
+            const url = `${HTTP_SERVER_URL}/elements`;
+            const token = localStorage.getItem('token');
+            const resp = await fetch(url, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            const respJson = await resp.json()
+            setElementList(respJson)
+        } catch (err) {
+            console.log("something went wrong. unable to get the elements")
+        }
+    }
+    useEffect(() => {
+        getAllElements()
+    }, [])
 
     const renderContent = () => {
         switch (modalName) {
@@ -162,7 +201,7 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                 return (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                         <div className="relative w-full max-w-md p-4 bg-white rounded-lg shadow-lg dark:bg-gray-800">
-                            {/* Modal Header */}
+                       
                             <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{modalName}</h3>
                                 <button
@@ -173,36 +212,34 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                 </button>
                             </div>
 
-                            {/* Modal Content */}
                             <div className="p-4 space-y-4">
-                                {/* Image URL Field */}
                                 <div>
                                     <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Image URL</label>
                                     <input
                                         type="text"
                                         name="imageUrl"
                                         value={createAvatarForm.imageUrl}
-                                        onChange={handleChange}
+                                        onChange={handleAvatarChange}
                                         className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                         placeholder="Enter image URL"
                                     />
                                 </div>
 
-                                {/* Name Field */}
+                            
                                 <div>
                                     <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
                                     <input
                                         type="text"
                                         name="name"
                                         value={createAvatarForm.name}
-                                        onChange={handleChange}
+                                        onChange={handleAvatarChange}
                                         className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                         placeholder="Enter name"
                                     />
                                 </div>
                             </div>
 
-                            {/* Modal Footer */}
+                     
                             <div className="flex justify-end space-x-2 p-4 border-t dark:border-gray-700">
                                 <button
                                     onClick={cancel}
@@ -225,7 +262,7 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                 return (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                         <div className="relative w-full max-w-md p-4 bg-white rounded-lg shadow-lg dark:bg-gray-800">
-                            {/* Modal Header */}
+
                             <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{modalName}</h3>
                                 <button
@@ -236,7 +273,6 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                 </button>
                             </div>
 
-                            {/* Modal Content */}
                             <div className="p-4 space-y-4">
                                 <div>
                                     <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
@@ -280,7 +316,6 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                 </div>
                             </div>
 
-                            {/* Modal Footer */}
                             <div className="flex justify-end space-x-2 p-4 border-t dark:border-gray-700">
                                 <button
                                     onClick={cancel}
@@ -303,7 +338,7 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                 return (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                         <div className="relative w-full max-w-lg p-4 bg-white rounded-lg shadow-lg dark:bg-gray-800">
-                            {/* Modal Header */}
+
                             <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{modalName}</h3>
                                 <button
@@ -314,9 +349,8 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                 </button>
                             </div>
 
-                            {/* Modal Content */}
                             <div className="p-4 space-y-4">
-                                {/* Thumbnail */}
+
                                 <div>
                                     <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                         Thumbnail URL
@@ -331,7 +365,6 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                     />
                                 </div>
 
-                                {/* Dimensions */}
                                 <div>
                                     <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                         Dimensions
@@ -346,7 +379,6 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                     />
                                 </div>
 
-                                {/* Name */}
                                 <div>
                                     <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                         Map Name
@@ -361,51 +393,43 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                     />
                                 </div>
 
-                                {/* Default Elements */}
-                                <div>
-                                    <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                        Default Elements
-                                    </label>
-                                    {createMapForm.defaultElement.map((element, index) => (
-                                        <div key={index} className="space-y-2">
-                                            <div className="flex items-center space-x-2">
-                                                <input
-                                                    type="text"
-                                                    name={`elementId-${index}`}
-                                                    value={element.elementId}
-                                                    onChange={(e) => handleDefaultElementChange(e, index, "elementId")}
-                                                    placeholder="Element ID"
-                                                    className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                                />
-                                                <input
-                                                    type="number"
-                                                    name={`x-${index}`}
-                                                    value={element.x}
-                                                    onChange={(e) => handleDefaultElementChange(e, index, "x")}
-                                                    placeholder="X Position"
-                                                    className="w-24 p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                                />
-                                                <input
-                                                    type="number"
-                                                    name={`y-${index}`}
-                                                    value={element.y}
-                                                    onChange={(e) => handleDefaultElementChange(e, index, "y")}
-                                                    placeholder="Y Position"
-                                                    className="w-24 p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                                />
-                                            </div>
+                                <div className="max-h-[200px] min-h-[100px] overflow-y-scroll hide-scrollbar">
+                                    {createMapForm.defaultElements.map((element, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex items-center gap-2 mb-4 w-full"
+                                        >
+                                            <CustomDropdownWithImage
+                                                elementList={elementList}
+                                                selectedElementId={element.elementId}
+                                                onSelect={(id) => handleDropdownChange(id, index)}
+                                            />
+                                            <input
+                                                type="number"
+                                                value={element.x}
+                                                onChange={(e) => handleDefaultElementChange(e, index, "x")}
+                                                placeholder="X Position"
+                                                className="w-20 p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            />
+
+                                            <input
+                                                type="number"
+                                                value={element.y}
+                                                onChange={(e) => handleDefaultElementChange(e, index, "y")}
+                                                placeholder="Y Position"
+                                                className="w-20 p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            />
                                         </div>
                                     ))}
-                                    <button
-                                        onClick={addDefaultElement}
-                                        className="px-4 py-2 mt-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600"
-                                    >
-                                        Add Element
-                                    </button>
                                 </div>
+                                <button
+                                    onClick={addDefaultElement}
+                                    className="px-4 py-2 mt-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:ring-4 focus:ring-green-300 dark:bg-green-500 dark:hover:bg-green-600"
+                                >
+                                    Add Element
+                                </button>
                             </div>
 
-                            {/* Modal Footer */}
                             <div className="flex justify-end space-x-2 p-4 border-t dark:border-gray-700">
                                 <button
                                     onClick={cancel}

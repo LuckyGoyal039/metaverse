@@ -89,6 +89,7 @@ export const createAvatar = async (req: Request, res: Response) => {
 
 export const createMap = async (req: Request, res: Response) => {
     try {
+     
         const parseData = CreateMapSchema.safeParse(req.body)
         if (!parseData.success) {
             res.status(400).json({ message: "invalid inputs" })
@@ -111,11 +112,11 @@ export const createMap = async (req: Request, res: Response) => {
                 }
             }
         })
-
         res.json({
             id: newMap.id
         })
     } catch (err) {
+        console.log("create map error: ", err)
         res.status(400).json({ message: "something went wrong" })
 
     }

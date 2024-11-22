@@ -29,7 +29,7 @@ export interface CreateMapDataSchema {
     thumbnail: string;
     dimensions: string;
     name: string,
-    defaultElement: Array<{
+    defaultElements: Array<{
         elementId: string,
         x: number,
         y: number
@@ -59,3 +59,17 @@ export type ModalStateUnion =
     | ModalState<CreateMapDataSchema>
     | ModalState<CreateAvatarDataSchema>
     | ModalState<CreateSpaceDataSchema>;
+
+export interface Element {
+    id: string;
+    width: number;
+    height: number;
+    image: string;
+    static: boolean;
+}
+
+export interface CustomDropdownWithImageProps {
+    elementList: Element[];
+    selectedElementId: string | null;
+    onSelect: (elementId: string) => void;
+}
