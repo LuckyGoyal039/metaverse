@@ -37,7 +37,7 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
     const [elementList, setElementList] = useState([])
     const [mapList, setMapList] = useState([])
 
-    const [selectedMap, setSelectedMap] = useState<MapsDataSchema | null>(null);
+    // const [selectedMap, setSelectedMap] = useState<MapsDataSchema | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
