@@ -122,8 +122,9 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
   }
   const createSpace = async (data: CreateSpaceDataSchema) => {
     try {
+      debugger;
       const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL
-      const url = `${HTTP_SERVER_URL}/admin/avatar`;
+      const url = `${HTTP_SERVER_URL}/space`;
       const token = localStorage.getItem('token');
       const resp = await fetch(url, {
         method: "POST",

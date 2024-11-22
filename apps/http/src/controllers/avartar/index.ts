@@ -79,8 +79,20 @@ export const getUserInfo = async (req: Request, res: Response) => {
             }
         })
         res.json(user)
-    } catch(err) {
-        console.log("Something went wrong: ",err)
+    } catch (err) {
+        console.log("Something went wrong: ", err)
+        res.status(500).json({
+            message: "Something went wrong"
+        })
+
+    }
+}
+export const getAllMaps = async (req: Request, res: Response) => {
+    try {
+        const maps = await client.map.findMany()
+        res.json(maps)
+    } catch (err) {
+        console.log("Something went wrong: ", err)
         res.status(500).json({
             message: "Something went wrong"
         })

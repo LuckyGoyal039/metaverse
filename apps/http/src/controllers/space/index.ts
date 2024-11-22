@@ -5,6 +5,9 @@ import client from '@meta/db/client'
 
 export const createSpace = async (req: Request, res: Response) => {
     try {
+        console.log('create space...')
+        console.log(req.body);
+
         const parseData = CreateSpaceSchema.safeParse(req.body)
         if (!parseData.success) {
             res.status(403).json({

@@ -3,6 +3,13 @@ import CloseIcon from '@mui/icons-material/Close';
 import { CreateAvatarDataSchema, CreateElementDataSchema, CreateMapDataSchema, CreateSpaceDataSchema, CustomModalProps } from "../../types";
 import CustomDropdownWithImage from "../customDropdown/dropdownWithImage";
 
+interface MapsDataSchema {
+    id: string,
+    name: string,
+    thumbnail: string,
+    width: number,
+    height: number
+}
 
 const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMapDataSchema | CreateAvatarDataSchema | CreateSpaceDataSchema
 >> = ({ modalName, cancel, callback }) => {
@@ -28,9 +35,9 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
         defaultElements: [{ elementId: "", x: 0, y: 0 }]
     });
     const [elementList, setElementList] = useState([])
-    const [selectedElementId, setSelectedElementId] = useState<string | null>(
-        null
-    );
+    const [mapList, setMapList] = useState([])
+
+    const [selectedMap, setSelectedMap] = useState<MapsDataSchema | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -108,8 +115,34 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
             console.log("something went wrong. unable to get the elements")
         }
     }
+    const getAllMaps = async () => {
+        try {
+            const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL
+            const url = `${HTTP_SERVER_URL}/user/all-maps`;
+            const token = localStorage.getItem('token');
+            const resp = await fetch(url, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
+            const respJson = await resp.json()
+            setMapList(respJson)
+            setCreateSpaceForm((prev) => ({
+                ...prev,
+                mapId: respJson[0].id,
+            }));
+        } catch (err) {
+            console.log("something went wrong. unable to get the elements")
+        }
+    }
     useEffect(() => {
-        getAllElements()
+        switch (modalName) {
+            case 'create-map': getAllElements()
+                break
+            case 'create-space': getAllMaps()
+        }
+
     }, [])
 
     const renderContent = () => {
@@ -201,7 +234,7 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                 return (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                         <div className="relative w-full max-w-md p-4 bg-white rounded-lg shadow-lg dark:bg-gray-800">
-                       
+
                             <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
                                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{modalName}</h3>
                                 <button
@@ -225,7 +258,7 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                     />
                                 </div>
 
-                            
+
                                 <div>
                                     <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
                                     <input
@@ -239,7 +272,7 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                 </div>
                             </div>
 
-                     
+
                             <div className="flex justify-end space-x-2 p-4 border-t dark:border-gray-700">
                                 <button
                                     onClick={cancel}
@@ -286,10 +319,28 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                     />
                                 </div>
 
+
+
+                                <div>
+                                    <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Map</label>
+                                    <select
+                                        name="mapId"
+                                        value={createSpaceForm.mapId}
+                                        onChange={handleSpaceChange}
+                                        className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    >
+                                        <option selected disabled >Select Map</option>
+                                        {
+                                            mapList.map((ele: MapsDataSchema) => {
+                                                return <option key={ele.id} value={ele.id}>{ele.name}</option>
+                                            })
+                                        }
+                                    </select>
+                                </div>
                                 <div>
                                     <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Dimension</label>
                                     <select
-                                        name="dimension"
+                                        name="dimensions"
                                         value={createSpaceForm.dimensions}
                                         onChange={handleSpaceChange}
                                         className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -297,21 +348,6 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                         <option value="">Select Dimension</option>
                                         <option value="2D">2D</option>
                                         <option value="3D">3D</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Map</label>
-                                    <select
-                                        name="map"
-                                        value={createSpaceForm.mapId}
-                                        onChange={handleSpaceChange}
-                                        className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    >
-                                        <option value="">Select Map</option>
-                                        <option value="map1">Map 1</option>
-                                        <option value="map2">Map 2</option>
-                                        <option value="map3">Map 3</option>
                                     </select>
                                 </div>
                             </div>
