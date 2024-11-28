@@ -14,7 +14,7 @@ datasource db {
 }
 
 model User {
-  id       String  @unique @default(cuid())
+  id       String  @id @default(cuid())
   username String  @unique
   password String
   role     Role
@@ -24,7 +24,7 @@ model User {
 }
 
 model Space {
-  id           String         @unique @default(cuid())
+  id           String         @id @default(cuid())
   name         String
   width        Int
   height       Int
@@ -35,7 +35,7 @@ model Space {
 }
 
 model SpaceElement {
-  id        String  @unique @default(cuid())
+  id        String  @id @default(cuid())
   x         Int
   y         Int
   elementId String
@@ -45,7 +45,7 @@ model SpaceElement {
 }
 
 model Element {
-  id           String         @unique @default(cuid())
+  id           String         @id @default(cuid())
   width        Int
   height       Int
   image        String
@@ -55,7 +55,7 @@ model Element {
 }
 
 model Map {
-  id         String       @unique @default(cuid())
+  id         String       @id @default(cuid())
   name       String
   width      Int
   height     Int
@@ -64,7 +64,7 @@ model Map {
 }
 
 model MapElement {
-  id        String  @unique @default(cuid())
+  id        String  @id @default(cuid())
   x         Int
   y         Int
   mapId     String
@@ -74,7 +74,7 @@ model MapElement {
 }
 
 model Avatar {
-  id    String @unique @default(cuid())
+  id    String @id @default(cuid())
   name  String
   image String
   User  User[]

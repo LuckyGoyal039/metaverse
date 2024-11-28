@@ -25,11 +25,19 @@ const CustomDropdownWithImage: React.FC<CustomDropdownWithImageProps> = ({
                     <>
                         <img
                             src={
-                                elementList.find((el) => el.id === selectedElementId)?.image ||
-                                ""
+                                elementList.find((el) => el.id === selectedElementId)?.image || ""
                             }
-                            alt="Selected Element"
-                            className="w-6 h-6 rounded-sm"
+                            alt="img"
+                            className="w-6 h-6 rounded-full object-cover"
+                            onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                                const circle = document.createElement("div");
+                                circle.style.width = "14px";
+                                circle.style.height = "14px";
+                                circle.style.borderRadius = "50%";
+                                circle.style.backgroundColor = "white";
+                                e.currentTarget.parentNode?.insertBefore(circle, e.currentTarget);
+                            }}
                         />
                         <span>{selectedElementId}</span>
                     </>
@@ -49,6 +57,15 @@ const CustomDropdownWithImage: React.FC<CustomDropdownWithImageProps> = ({
                                 src={el.image}
                                 alt={el.id}
                                 className="w-6 h-6 rounded-sm"
+                                onError={(e) => {
+                                    e.currentTarget.style.display = "none";
+                                    const circle = document.createElement("div");
+                                    circle.style.width = "14px";
+                                    circle.style.height = "14px";
+                                    circle.style.borderRadius = "50%";
+                                    circle.style.backgroundColor = "white";
+                                    e.currentTarget.parentNode?.insertBefore(circle, e.currentTarget);
+                                }}
                             />
                             <span className="truncate w-full overflow-hidden whitespace-nowrap">{el.id}</span>
                         </div>

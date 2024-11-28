@@ -5,8 +5,10 @@ import client from '@meta/db/client'
 export const CreateNewElement = async (req: Request, res: Response) => {
     try {
         console.log("start element create...");
+        // console.log("body:", req.body)
         const parseData = CreateElementSchema.safeParse(req.body)
         if (!parseData.success) {
+            // console.log(parseData.error)
             res.status(400).json({ message: "invalid inputs" })
             return
         }
@@ -28,6 +30,7 @@ export const CreateNewElement = async (req: Request, res: Response) => {
             id: element.id
         })
     } catch (err) {
+        console.log("crete element err: ", err)
         res.status(500).json({
             message: "something went wrong"
         })
@@ -89,7 +92,7 @@ export const createAvatar = async (req: Request, res: Response) => {
 
 export const createMap = async (req: Request, res: Response) => {
     try {
-     
+
         const parseData = CreateMapSchema.safeParse(req.body)
         if (!parseData.success) {
             res.status(400).json({ message: "invalid inputs" })

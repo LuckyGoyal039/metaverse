@@ -41,13 +41,24 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
-        const isChecked = (type === "checkbox") ? e.target.checked : undefined
-
+        
+        let parsedValue: any;
+        if (type === "checkbox") {
+            parsedValue = e.target.checked; // For checkboxes, use the "checked" property
+        } else if (type === "number") {
+            parsedValue = Number(value); // Convert numbers to actual numbers
+        } else if (e.target.tagName === "SELECT" && (value === "true" || value === "false")) {
+            parsedValue = value === "true"; // Handle boolean select inputs
+        } else {
+            parsedValue = value; // For everything else, use the value directly
+        }
+    
         setCreateElementForm((prev) => ({
             ...prev,
-            [name]: type === "checkbox" ? isChecked : type === "number" ? Number(value) : value,
+            [name]: parsedValue,
         }));
     };
+    
 
     const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;

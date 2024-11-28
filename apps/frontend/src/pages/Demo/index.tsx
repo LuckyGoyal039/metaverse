@@ -4,6 +4,8 @@
 // import MySpace from "../../component/mySpace";
 // import WaitingPage from "../../component/waiting";
 
+import SpaceArena from "../../component/spaceArena"
+
 function Demo() {
     // const [tab, setTab] = useState('event')
     // const [user, setUser] = useState();
@@ -32,7 +34,9 @@ function Demo() {
     // }, [])
     return (
         <>
-            <h1>demo page</h1>
+            <div className="flex w-full  h-[90vh] justify-center items-center">
+                <SpaceArena />
+            </div>
             {/* <Header tab={tab} setTab={setTab} /> */}
             {
                 // tab == "event" ? <Events /> : null

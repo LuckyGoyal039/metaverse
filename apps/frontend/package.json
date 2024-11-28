@@ -16,10 +16,12 @@
     "@mui/icons-material": "^6.1.6",
     "@mui/material": "^6.1.6",
     "flowbite-react": "^0.10.2",
+    "phaser": "^3.87.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0",
-    "react-toastify": "^10.0.6"
+    "react-toastify": "^10.0.6",
+    "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",

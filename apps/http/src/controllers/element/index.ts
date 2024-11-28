@@ -4,6 +4,7 @@ import client from '@meta/db/client'
 export const getAllElement = async (req: Request, res: Response) => {
     try {
         const result = await client.element.findMany()
+        console.log("all elements: ",result);
         res.status(200).json(result);
 
     } catch (err) {
