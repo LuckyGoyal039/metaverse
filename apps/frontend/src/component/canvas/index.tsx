@@ -1,11 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
 import { socket } from '../../socket';
-
 import tilesetImg from '../../assets/tilemaps/tileset.png'
 import map1Json from '../../assets/tilemaps/map1.json'
 import ACgarRight from '../../assets/tilemaps/ACgarRight.png';
-// Import other direction sprites
 import ACgarLeft from '../../assets/tilemaps/ACharLeft.png';
 import ACgarUp from '../../assets/tilemaps/ACharUp.png';
 import ACgarDown from '../../assets/tilemaps/ACharDown.png';
@@ -20,6 +18,7 @@ interface SceneState {
     localPlayer: Phaser.Physics.Arcade.Sprite | null;
     otherPlayers: Record<string, Phaser.Physics.Arcade.Sprite>;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys | null;
+    camera: Phaser.Cameras.Scene2D.Camera | null
 }
 
 const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size }) => {
@@ -27,7 +26,8 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size }) => {
     const sceneRef = useRef<SceneState>({
         localPlayer: null,
         otherPlayers: {},
-        cursors: null
+        cursors: null,
+        camera: null
     });
 
     useEffect(() => {
@@ -35,7 +35,6 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size }) => {
             socket.removeAllListeners();
             const scene = sceneRef.current;
 
-            // Create animations
             this.anims.create({
                 key: 'walk-right',
                 frames: this.anims.generateFrameNumbers('player-right', { start: 0, end: 3 }),
@@ -80,7 +79,6 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size }) => {
 
                 if (upperLayer) {
                     upperLayer.setCollisionByProperty({ collides: true });
-                    // const debugGraphics = this.add.graphics().setAlpha(0.75);
 
                     this.physics.add.collider(scene.localPlayer, upperLayer, () => {
                         console.log('Collision occurred!');
@@ -93,6 +91,10 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size }) => {
 
             Object.values(scene.otherPlayers).forEach(player => player.destroy());
             scene.otherPlayers = {};
+            scene.camera = this.cameras.main;
+            if (scene.localPlayer)
+                scene.camera.startFollow(scene.localPlayer, true, 0.1, 0.1);
+            scene.camera.setZoom(1.3)
 
             socket.on('newPlayer', (players: Record<string, { x: number; y: number }>) => {
                 Object.entries(players).forEach(([id, { x, y }]) => {
@@ -110,7 +112,6 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size }) => {
                 if (otherPlayer) {
                     otherPlayer.setPosition(playerInfo.x, playerInfo.y);
 
-                    // Determine and play animation based on movement
                     if (playerInfo.dx < 0) {
                         otherPlayer.anims.play('walk-left', true);
                     } else if (playerInfo.dx > 0) {
@@ -170,7 +171,6 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size }) => {
             this.load.image('tile', tilesetImg);
             this.load.tilemapTiledJSON('map1', map1Json);
 
-            // Load all direction spritesheets
             this.load.spritesheet('player-right', ACgarRight, {
                 frameWidth: 24,
                 frameHeight: 24,
