@@ -2,6 +2,10 @@ import React, { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
 import { socket } from '../../socket';
 
+import tilesetImg from '../../assets/tilemaps/tileset.png'
+import map1Json from '../../assets/tilemaps/map1.json'
+
+
 interface CanvasProps {
     rows: number;
     cols: number;
@@ -27,19 +31,58 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size }) => {
             socket.removeAllListeners();
             const scene = sceneRef.current;
 
-            const graphics = this.add.graphics();
-            graphics.lineStyle(1, 0xffffff, 0.5);
+            // Create the tilemap
+            const map = this.make.tilemap({ key: 'map1', tileWidth: 32, tileHeight: 32 });
 
-            for (let row = 0; row <= rows; row++) {
-                graphics.strokeLineShape(new Phaser.Geom.Line(0, row * tile_size, cols * tile_size, row * tile_size));
-            }
-            for (let col = 0; col <= cols; col++) {
-                graphics.strokeLineShape(new Phaser.Geom.Line(col * tile_size, 0, col * tile_size, rows * tile_size));
+            // The second parameter ('tileset') should match the key you used in preload
+            // The first parameter should match the name of your tileset in the TSX file
+            const tileset = map.addTilesetImage('tile1', 'tile');
+
+            if (tileset) {
+
+                // Create the layer using the exact name from your map
+                const groundLayer = map.createLayer('ground', tileset, 0, 0);
+                const upperLayer = map.createLayer('upper', tileset, 0, 0);
+
+                if (groundLayer) {
+                    // Optional: Set world bounds based on map size
+                    this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+                }
+                scene.localPlayer = this.add.rectangle(50, 50, tile_size, tile_size, 0x0000ff);
+                this.physics.add.existing(scene.localPlayer);
+                (scene.localPlayer.body as Phaser.Physics.Arcade.Body).setSize(tile_size, tile_size).setOffset(0, 0);
+
+                (scene.localPlayer.body as Phaser.Physics.Arcade.Body).setCollideWorldBounds(true);
+
+                if (upperLayer) {
+
+                    console.log("collider added")
+                    // upperLayer.setCollisionByExclusion([-1]);
+                    upperLayer.setCollisionByProperty({ collides: true });
+                    const debugGraphics = this.add.graphics().setAlpha(0.75);
+                    upperLayer.renderDebug(debugGraphics, {
+                        tileColor: null,
+                        collidingTileColor: new Phaser.Display.Color(255, 0, 0, 255),
+                        faceColor: new Phaser.Display.Color(0, 255, 0, 255)
+                    });
+                    this.physics.add.collider(scene.localPlayer, upperLayer, () => {
+                        console.log('Collision occurred!');
+                    });
+                    
+                    this.physics.add.overlap(scene.localPlayer, upperLayer, () => {
+                        console.log('Overlap detected!');
+                    });
+                }
+                this.physics.world.drawDebug = true;
+this.physics.world.debugGraphic.setAlpha(0.75);
+
+                console.log('Player Body:', scene.localPlayer.body);
             }
 
-            scene.localPlayer = this.add.rectangle(0, 0, tile_size, tile_size, 0x0000ff);
-            this.physics.add.existing(scene.localPlayer);
-            (scene.localPlayer.body as Phaser.Physics.Arcade.Body).setCollideWorldBounds(true);
+            // Player and socket logic
+            // scene.localPlayer = this.add.rectangle(0, 0, tile_size, tile_size, 0x0000ff);
+            // this.physics.add.existing(scene.localPlayer);
+
             if (this.input.keyboard?.createCursorKeys)
                 scene.cursors = this.input.keyboard.createCursorKeys();
 
@@ -62,7 +105,6 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size }) => {
                 scene.localPlayer?.setPosition(x, y);
             });
         };
-
         const update = function (this: Phaser.Scene) {
             const scene = sceneRef.current;
             if (!scene.localPlayer || !scene.cursors) return;
@@ -77,15 +119,20 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size }) => {
 
             if (movement.dx || movement.dy) socket.emit('movePlayer', movement);
         };
-
+        const preload = function (this: Phaser.Scene) {
+            // Make sure this path points to your actual tileset image file
+            // debugger
+            this.load.image('tile', tilesetImg);
+            this.load.tilemapTiledJSON('map1', map1Json);
+        }
         socket.connect();
         gameRef.current = new Phaser.Game({
             type: Phaser.AUTO,
             width: cols * tile_size,
             height: rows * tile_size,
             parent: 'phaser-container',
-            physics: { default: 'arcade', arcade: { debug: false } },
-            scene: { create, update }
+            physics: { default: 'arcade', arcade: { debug: true } },
+            scene: { create, update, preload }
         });
 
         return () => {
