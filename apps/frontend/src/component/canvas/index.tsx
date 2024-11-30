@@ -68,13 +68,13 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size }) => {
                     this.physics.add.collider(scene.localPlayer, upperLayer, () => {
                         console.log('Collision occurred!');
                     });
-                    
+
                     this.physics.add.overlap(scene.localPlayer, upperLayer, () => {
                         console.log('Overlap detected!');
                     });
                 }
                 this.physics.world.drawDebug = true;
-this.physics.world.debugGraphic.setAlpha(0.75);
+                this.physics.world.debugGraphic.setAlpha(0.75);
 
                 console.log('Player Body:', scene.localPlayer.body);
             }

@@ -4,6 +4,8 @@ import Home from './pages/Home'
 import Landing from './pages/landing'
 import Signin from './pages/signin'
 import Demo from './pages/Demo'
+import NotFound from './pages/errPage/404'
+import ServerError from './pages/errPage/500'
 function App() {
 
   const router = createBrowserRouter([
@@ -23,11 +25,19 @@ function App() {
       path: "/signin",
       element: <Signin />
     },
+
     {
       path: "/demo",
       element: <Demo />
     },
-    
+    {
+      path: "*",
+      element: <NotFound />
+    },
+    {
+      path: "/500",
+      element: <ServerError />
+    },
 
   ])
   return (
