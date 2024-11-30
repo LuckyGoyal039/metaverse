@@ -8,5 +8,5 @@ userRouter.post("/metadata", userMiddleware, updateAvatar)
 userRouter.post("/metadata/bulk", userMiddleware, getBulkAvatarData)
 userRouter.post('/sign-out', userMiddleware, SignoUT)
 userRouter.get("/user-info", userMiddleware, getUserInfo)
-userRouter.get("/all-maps", userMiddleware, getAllMaps)
+userRouter.get("/all-maps", getAllMaps)
 export default userRouter

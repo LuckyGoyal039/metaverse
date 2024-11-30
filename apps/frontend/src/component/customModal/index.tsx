@@ -3,12 +3,17 @@ import CloseIcon from '@mui/icons-material/Close';
 import { CreateAvatarDataSchema, CreateElementDataSchema, CreateMapDataSchema, CreateSpaceDataSchema, CustomModalProps } from "../../types";
 import CustomDropdownWithImage from "../customDropdown/dropdownWithImage";
 
+// interface MapsDataSchema {
+//     id: string,
+//     name: string,
+//     thumbnail: string,
+//     width: number,
+//     height: number
+// }
 interface MapsDataSchema {
     id: string,
     name: string,
     thumbnail: string,
-    width: number,
-    height: number
 }
 
 const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMapDataSchema | CreateAvatarDataSchema | CreateSpaceDataSchema
@@ -25,7 +30,7 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
     });
     const [createSpaceForm, setCreateSpaceForm] = useState<CreateSpaceDataSchema>({
         name: "",
-        dimensions: "",
+        dimensions: "500x500",
         mapId: "",
     });
     const [createMapForm, setCreateMapForm] = useState<CreateMapDataSchema>({
@@ -41,7 +46,7 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
-        
+
         let parsedValue: any;
         if (type === "checkbox") {
             parsedValue = e.target.checked; // For checkboxes, use the "checked" property
@@ -52,13 +57,13 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
         } else {
             parsedValue = value; // For everything else, use the value directly
         }
-    
+
         setCreateElementForm((prev) => ({
             ...prev,
             [name]: parsedValue,
         }));
     };
-    
+
 
     const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -72,6 +77,12 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
         setCreateSpaceForm((prev) => ({
             ...prev,
             [name]: value,
+        }));
+    };
+    const handleMapSelect = (mapId: string) => {
+        setCreateSpaceForm((prev) => ({
+            ...prev,
+            mapId,
         }));
     };
     const handleMapChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -139,6 +150,7 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
             })
             const respJson = await resp.json()
             setMapList(respJson)
+            console.log(respJson)
             setCreateSpaceForm((prev) => ({
                 ...prev,
                 mapId: respJson[0].id,
@@ -319,7 +331,7 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
 
                             <div className="p-4 space-y-4">
                                 <div>
-                                    <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
+                                    <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Space Name</label>
                                     <input
                                         type="text"
                                         name="name"
@@ -329,10 +341,26 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                         placeholder="Enter name"
                                     />
                                 </div>
-
-
-
                                 <div>
+                                    <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Select Map</label>
+                                    <ul className="flex gap-4 flex-wrap max-h-52 overflow-y-auto px-5">
+                                        {
+                                            mapList.map((ele: MapsDataSchema) => {
+                                                return <div className="rounded-xl border flex flex-col justify-center text-center text-white 
+                                                hover:border-blue-500 hover:scale-105 transition-all duration-300 "
+                                                    key={ele.id}
+                                                    onClick={() => handleMapSelect(ele.id)}>
+                                                    <div>
+                                                        <img src={ele.thumbnail} alt='map-image' className="w-24 h-24 rounded-tl-xl rounded-tr-xl" />
+                                                    </div>
+                                                    <p>{ele.name}</p>
+                                                </div>
+                                            })
+                                        }
+                                    </ul>
+                                </div>
+
+                                {/* <div>
                                     <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Map</label>
                                     <select
                                         name="mapId"
@@ -347,8 +375,8 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                             })
                                         }
                                     </select>
-                                </div>
-                                <div>
+                                </div> */}
+                                {/* <div>
                                     <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Dimension</label>
                                     <select
                                         name="dimensions"
@@ -360,7 +388,7 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                         <option value="2D">2D</option>
                                         <option value="3D">3D</option>
                                     </select>
-                                </div>
+                                </div> */}
                             </div>
 
                             <div className="flex justify-end space-x-2 p-4 border-t dark:border-gray-700">

@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import avatar60 from '../../assets/avatar_60_dancing.png'
 import WorkspacesIcon from '@mui/icons-material/Workspaces';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
+// import AddCircleIcon from '@mui/icons-material/AddCircle';
 import mainLogo from '../../assets/main_logo.png'
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import CustomModal from '../customModal';
 import { CallbackFunctions, CreateAvatarDataSchema, CreateElementDataSchema, CreateMapDataSchema, CreateSpaceDataSchema, ModalStateUnion } from '../../types';
-import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
+// import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 
 
@@ -70,56 +70,56 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
       }
     })
   }
-  const createElement = async (data: CreateElementDataSchema) => {
-    try {
-      const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL
-      const url = `${HTTP_SERVER_URL}/admin/element`;
-      const token = localStorage.getItem('token');
-      const resp = await fetch(url, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-      })
-      const respJson = await resp.json()
-      console.log(respJson)
-      toast.success("Element is Created Successfully", {
-        position: "top-center"
-      })
-    } catch (err) {
-      toast.error("Unable to create Element", {
-        position: "top-center"
-      })
-      console.log(err)
-    }
-  }
-  const createAvatar = async (data: CreateAvatarDataSchema) => {
-    try {
-      const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL
-      const url = `${HTTP_SERVER_URL}/admin/avatar`;
-      const token = localStorage.getItem('token');
-      const resp = await fetch(url, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-      })
-      const respJson = await resp.json()
-      console.log(respJson)
-      toast.success("Avatar is Created Successfully", {
-        position: "top-center"
-      })
-    } catch (err) {
-      toast.error("Unable to create Element", {
-        position: "top-center"
-      })
-      console.log(err)
-    }
-  }
+  // const createElement = async (data: CreateElementDataSchema) => {
+  //   try {
+  //     const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL
+  //     const url = `${HTTP_SERVER_URL}/admin/element`;
+  //     const token = localStorage.getItem('token');
+  //     const resp = await fetch(url, {
+  //       method: "POST",
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //         "Content-Type": "application/json"
+  //       },
+  //       body: JSON.stringify(data)
+  //     })
+  //     const respJson = await resp.json()
+  //     console.log(respJson)
+  //     toast.success("Element is Created Successfully", {
+  //       position: "top-center"
+  //     })
+  //   } catch (err) {
+  //     toast.error("Unable to create Element", {
+  //       position: "top-center"
+  //     })
+  //     console.log(err)
+  //   }
+  // }
+  // const createAvatar = async (data: CreateAvatarDataSchema) => {
+  //   try {
+  //     const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL
+  //     const url = `${HTTP_SERVER_URL}/admin/avatar`;
+  //     const token = localStorage.getItem('token');
+  //     const resp = await fetch(url, {
+  //       method: "POST",
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //         "Content-Type": "application/json"
+  //       },
+  //       body: JSON.stringify(data)
+  //     })
+  //     const respJson = await resp.json()
+  //     console.log(respJson)
+  //     toast.success("Avatar is Created Successfully", {
+  //       position: "top-center"
+  //     })
+  //   } catch (err) {
+  //     toast.error("Unable to create Element", {
+  //       position: "top-center"
+  //     })
+  //     console.log(err)
+  //   }
+  // }
   const createSpace = async (data: CreateSpaceDataSchema) => {
     try {
       debugger;
@@ -134,11 +134,15 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
         },
         body: JSON.stringify(data)
       })
+      if(!resp.ok){
+        throw Error("Unable to create space")
+      }
       const respJson = await resp.json()
       console.log(respJson)
       toast.success("Avatar is Created Successfully", {
         position: "top-center"
       })
+      closeModal();
     } catch (err) {
       toast.error("Unable to create Element", {
         position: "top-center"
@@ -146,32 +150,32 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
       console.log(err)
     }
   }
-  const createMap = async (data: CreateMapDataSchema) => {
-    try {
-      debugger;
-      const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL
-      const url = `${HTTP_SERVER_URL}/admin/map`;
-      const token = localStorage.getItem('token');
-      const resp = await fetch(url, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-      })
-      const respJson = await resp.json()
-      console.log(respJson)
-      toast.success("Avatar is Created Successfully", {
-        position: "top-center"
-      })
-    } catch (err) {
-      toast.error("Unable to create Element", {
-        position: "top-center"
-      })
-      console.log(err)
-    }
-  }
+  // const createMap = async (data: CreateMapDataSchema) => {
+  //   try {
+  //     debugger;
+  //     const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL
+  //     const url = `${HTTP_SERVER_URL}/admin/map`;
+  //     const token = localStorage.getItem('token');
+  //     const resp = await fetch(url, {
+  //       method: "POST",
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //         "Content-Type": "application/json"
+  //       },
+  //       body: JSON.stringify(data)
+  //     })
+  //     const respJson = await resp.json()
+  //     console.log(respJson)
+  //     toast.success("Avatar is Created Successfully", {
+  //       position: "top-center"
+  //     })
+  //   } catch (err) {
+  //     toast.error("Unable to create Element", {
+  //       position: "top-center"
+  //     })
+  //     console.log(err)
+  //   }
+  // }
 
   return (
     <header>
@@ -234,7 +238,7 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
               )}
             </div>
 
-            <button className="flex items-center gap-2 font-semibold text-[#282d4e] bg-[#06d6a0] hover:bg-[#76dbc4] px-6 py-2 rounded-lg hover:bg-[#00a89d]" onClick={() => {
+            {/* <button className="flex items-center gap-2 font-semibold text-[#282d4e] bg-[#06d6a0] hover:bg-[#76dbc4] px-6 py-2 rounded-lg hover:bg-[#00a89d]" onClick={() => {
               setMyModal((prev) => {
                 return {
                   ...prev,
@@ -278,7 +282,7 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
               <span>
                 Create Avatar
               </span>
-            </button>
+            </button> */}
             <button className="flex items-center gap-2 font-semibold text-[#282d4e] bg-[#06d6a0] hover:bg-[#76dbc4] px-4 py-2 rounded-lg hover:bg-[#00a89d]" onClick={() => {
               setMyModal((prev) => {
                 return {

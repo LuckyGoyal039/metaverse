@@ -75,7 +75,8 @@ function Demo() {
                     {data ? (
                         <SpaceArena />
                     ) : (
-                        <div>No data found</div>
+                        <SpaceArena />
+                        // <div>No data found</div>
                     )}
                 </div>
             )}

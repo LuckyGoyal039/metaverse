@@ -80,6 +80,50 @@ export const createSpace = async (req: Request, res: Response) => {
         res.status(400).json({ message: "something went wrong" })
     }
 }
+export const tempCreateSpace = async (req: Request, res: Response) => {
+    try {
+        console.log('Creating space...');
+        const defaultMapId = '1'; 
+        const defaultDimensions = '500x500'; 
+
+        const parseData = CreateSpaceSchema.safeParse(req.body);
+        if (!parseData.success) {
+            res.status(400).json({ message: "Invalid inputs" });
+            return;
+        }
+        const { name, dimensions = defaultDimensions, mapId = defaultMapId } = parseData.data;
+
+        if (!/^\d+x\d+$/.test(dimensions)) {
+            res.status(400).json({ message: "Invalid dimensions format. Use 'widthxheight'." });
+            return;
+        }
+        const [width, height] = dimensions.split('x').map(Number);
+        if (isNaN(width) || isNaN(height)) {
+            res.status(400).json({ message: "Invalid dimensions values." });
+            return;
+        }
+        const map = await client.map.findUnique({
+            where: { id: mapId },
+            select: { width: true, height: true },
+        });
+
+        const spaceWidth = map?.width || width;
+        const spaceHeight = map?.height || height;
+        const space = await client.space.create({
+            data: {
+                name,
+                width: spaceWidth,
+                height: spaceHeight,
+                creatorId: req.userId!,
+            },
+        });
+
+        res.status(201).json({ spaceId: space.id });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Something went wrong" });
+    }
+}
 
 export const deleteSpace = async (req: Request, res: Response) => {
     try {
@@ -123,6 +167,7 @@ export const deleteSpace = async (req: Request, res: Response) => {
 
 export const getMySpace = async (req: Request, res: Response) => {
     try {
+        console.log("getSpaces")
         const space = await client.space.findMany({
             where: {
                 creatorId: req.userId

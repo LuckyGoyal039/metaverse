@@ -4,7 +4,11 @@ import { socket } from '../../socket';
 
 import tilesetImg from '../../assets/tilemaps/tileset.png'
 import map1Json from '../../assets/tilemaps/map1.json'
-
+import ACgarRight from '../../assets/tilemaps/ACgarRight.png';
+// Import other direction sprites
+import ACgarLeft from '../../assets/tilemaps/ACharLeft.png';
+import ACgarUp from '../../assets/tilemaps/ACharUp.png';
+import ACgarDown from '../../assets/tilemaps/ACharDown.png';
 
 interface CanvasProps {
     rows: number;
@@ -13,8 +17,8 @@ interface CanvasProps {
 }
 
 interface SceneState {
-    localPlayer: Phaser.GameObjects.Rectangle | null;
-    otherPlayers: Record<string, Phaser.GameObjects.Rectangle>;
+    localPlayer: Phaser.Physics.Arcade.Sprite | null;
+    otherPlayers: Record<string, Phaser.Physics.Arcade.Sprite>;
     cursors: Phaser.Types.Input.Keyboard.CursorKeys | null;
 }
 
@@ -31,57 +35,58 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size }) => {
             socket.removeAllListeners();
             const scene = sceneRef.current;
 
-            // Create the tilemap
-            const map = this.make.tilemap({ key: 'map1', tileWidth: 32, tileHeight: 32 });
+            // Create animations
+            this.anims.create({
+                key: 'walk-right',
+                frames: this.anims.generateFrameNumbers('player-right', { start: 0, end: 3 }),
+                frameRate: 8,
+                repeat: -1
+            });
 
-            // The second parameter ('tileset') should match the key you used in preload
-            // The first parameter should match the name of your tileset in the TSX file
+            this.anims.create({
+                key: 'walk-left',
+                frames: this.anims.generateFrameNumbers('player-left', { start: 0, end: 3 }),
+                frameRate: 8,
+                repeat: -1
+            });
+
+            this.anims.create({
+                key: 'walk-up',
+                frames: this.anims.generateFrameNumbers('player-up', { start: 0, end: 3 }),
+                frameRate: 8,
+                repeat: -1
+            });
+
+            this.anims.create({
+                key: 'walk-down',
+                frames: this.anims.generateFrameNumbers('player-down', { start: 0, end: 3 }),
+                frameRate: 8,
+                repeat: -1
+            });
+
+            const map = this.make.tilemap({ key: 'map1', tileWidth: 32, tileHeight: 32 });
             const tileset = map.addTilesetImage('tile1', 'tile');
 
             if (tileset) {
-
-                // Create the layer using the exact name from your map
                 const groundLayer = map.createLayer('ground', tileset, 0, 0);
                 const upperLayer = map.createLayer('upper', tileset, 0, 0);
 
                 if (groundLayer) {
-                    // Optional: Set world bounds based on map size
                     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
                 }
-                scene.localPlayer = this.add.rectangle(50, 50, tile_size, tile_size, 0x0000ff);
-                this.physics.add.existing(scene.localPlayer);
-                (scene.localPlayer.body as Phaser.Physics.Arcade.Body).setSize(tile_size, tile_size).setOffset(0, 0);
 
-                (scene.localPlayer.body as Phaser.Physics.Arcade.Body).setCollideWorldBounds(true);
+                scene.localPlayer = this.physics.add.sprite(50, 50, 'player-right', 0);
+                scene.localPlayer.setCollideWorldBounds(true);
 
                 if (upperLayer) {
-
-                    console.log("collider added")
-                    // upperLayer.setCollisionByExclusion([-1]);
                     upperLayer.setCollisionByProperty({ collides: true });
-                    const debugGraphics = this.add.graphics().setAlpha(0.75);
-                    upperLayer.renderDebug(debugGraphics, {
-                        tileColor: null,
-                        collidingTileColor: new Phaser.Display.Color(255, 0, 0, 255),
-                        faceColor: new Phaser.Display.Color(0, 255, 0, 255)
-                    });
+                    // const debugGraphics = this.add.graphics().setAlpha(0.75);
+
                     this.physics.add.collider(scene.localPlayer, upperLayer, () => {
                         console.log('Collision occurred!');
                     });
-
-                    this.physics.add.overlap(scene.localPlayer, upperLayer, () => {
-                        console.log('Overlap detected!');
-                    });
                 }
-                this.physics.world.drawDebug = true;
-                this.physics.world.debugGraphic.setAlpha(0.75);
-
-                console.log('Player Body:', scene.localPlayer.body);
             }
-
-            // Player and socket logic
-            // scene.localPlayer = this.add.rectangle(0, 0, tile_size, tile_size, 0x0000ff);
-            // this.physics.add.existing(scene.localPlayer);
 
             if (this.input.keyboard?.createCursorKeys)
                 scene.cursors = this.input.keyboard.createCursorKeys();
@@ -94,37 +99,96 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size }) => {
                     if (id === socket.id) {
                         scene.localPlayer?.setPosition(x, y);
                     } else if (!scene.otherPlayers[id]) {
-                        scene.otherPlayers[id] = this.add.rectangle(x, y, tile_size, tile_size, 0xff0000);
+                        scene.otherPlayers[id] = this.physics.add.sprite(x, y, 'player-right', 0);
                     } else {
                         scene.otherPlayers[id].setPosition(x, y);
                     }
                 });
+            });
+            socket.on('playerMoved', (playerInfo: { id: string; x: number; y: number; dx: number; dy: number }) => {
+                const otherPlayer = scene.otherPlayers[playerInfo.id];
+                if (otherPlayer) {
+                    otherPlayer.setPosition(playerInfo.x, playerInfo.y);
+
+                    // Determine and play animation based on movement
+                    if (playerInfo.dx < 0) {
+                        otherPlayer.anims.play('walk-left', true);
+                    } else if (playerInfo.dx > 0) {
+                        otherPlayer.anims.play('walk-right', true);
+                    } else if (playerInfo.dy < 0) {
+                        otherPlayer.anims.play('walk-up', true);
+                    } else if (playerInfo.dy > 0) {
+                        otherPlayer.anims.play('walk-down', true);
+                    } else {
+                        otherPlayer.anims.stop();
+                        otherPlayer.setFrame(0);
+                    }
+                }
             });
 
             socket.on('collision', ({ x, y }: { x: number; y: number }) => {
                 scene.localPlayer?.setPosition(x, y);
             });
         };
+
         const update = function (this: Phaser.Scene) {
             const scene = sceneRef.current;
             if (!scene.localPlayer || !scene.cursors) return;
 
             const movement = { dx: 0, dy: 0 };
+            const speed = 2;
             (scene.localPlayer.body as Phaser.Physics.Arcade.Body).setVelocity(0);
 
-            if (scene.cursors.left.isDown) movement.dx = -5;
-            else if (scene.cursors.right.isDown) movement.dx = 5;
-            if (scene.cursors.up.isDown) movement.dy = -5;
-            else if (scene.cursors.down.isDown) movement.dy = 5;
+            if (scene.cursors.left.isDown) {
+                movement.dx = -speed;
+                scene.localPlayer.anims.play('walk-left', true);
+            } else if (scene.cursors.right.isDown) {
+                movement.dx = speed;
+                scene.localPlayer.anims.play('walk-right', true);
+            } else if (scene.cursors.up.isDown) {
+                movement.dy = -speed;
+                scene.localPlayer.anims.play('walk-up', true);
+            } else if (scene.cursors.down.isDown) {
+                movement.dy = speed;
+                scene.localPlayer.anims.play('walk-down', true);
+            } else {
+                scene.localPlayer.anims.stop();
+                // Set the idle frame (first frame) of the current direction
+                scene.localPlayer.setFrame(0);
+            }
 
-            if (movement.dx || movement.dy) socket.emit('movePlayer', movement);
+            if (movement.dx || movement.dy) {
+                socket.emit('movePlayer', {
+                    ...movement,
+                    x: scene.localPlayer.x,
+                    y: scene.localPlayer.y
+                });
+            }
         };
+
         const preload = function (this: Phaser.Scene) {
-            // Make sure this path points to your actual tileset image file
-            // debugger
             this.load.image('tile', tilesetImg);
             this.load.tilemapTiledJSON('map1', map1Json);
+
+            // Load all direction spritesheets
+            this.load.spritesheet('player-right', ACgarRight, {
+                frameWidth: 24,
+                frameHeight: 24,
+            });
+            this.load.spritesheet('player-left', ACgarLeft, {
+                frameWidth: 24,
+                frameHeight: 24,
+            });
+            this.load.spritesheet('player-up', ACgarUp, {
+                frameWidth: 24,
+                frameHeight: 24,
+            });
+            this.load.spritesheet('player-down', ACgarDown, {
+                frameWidth: 24,
+                frameHeight: 24,
+            });
         }
+
         socket.connect();
         gameRef.current = new Phaser.Game({
             type: Phaser.AUTO,

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Header from "../../component/header";
 import Events from "../../component/events";
 import MySpace from "../../component/mySpace";
-import WaitingPage from "../../component/waiting";
+// import WaitingPage from "../../component/waiting";
 import { ToastContainer } from "react-toastify";
 // import { CreateElementDataSchema, CreateElementFunctionSchema } from "../../types";
 
@@ -44,7 +44,7 @@ function Home() {
             {
                 tab == "space" ? <MySpace /> : null
             }
-            <WaitingPage/>
+            {/* <WaitingPage/> */}
         </>
     )
 }

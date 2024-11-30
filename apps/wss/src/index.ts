@@ -1,12 +1,27 @@
 import express from 'express'
-// import client from '@meta/db/client'
 const app = express()
 import http from 'http'
-import { playersSchema } from './types/interfaces'
-const server = http.createServer(app)
-
-
 import { Server } from 'socket.io'
+
+interface Square {
+    x: number;
+    y: number;
+    size: number;
+}
+
+// Updated player interface to include movement direction
+interface Player {
+    x: number;
+    y: number;
+    avatarImage: string;
+    name: string;
+    dx?: number;  // Added for animation
+    dy?: number;  // Added for animation
+}
+
+let players: Record<string, Player> = {}
+
+const server = http.createServer(app)
 const io = new Server(server, {
     cors: {
         origin: "http://localhost:5173"
@@ -14,22 +29,22 @@ const io = new Server(server, {
     pingInterval: 2000,
     pingTimeout: 4000,
 })
-interface Square {
-    x: number;
-    y: number;
-    size: number;
-}
 
-let players: playersSchema = {}
 io.on('connection', (socket) => {
     console.log('Player connected with socket id: ', socket.id);
-
-    // Assign a random position to the new player
+    
+    // Initialize new player
     const randomX = Math.floor(Math.random() * 769);
     const randomY = Math.floor(Math.random() * 449);
-    players[socket.id] = { x: randomX, y: randomY, avatarImage: '', name: '' };
+    players[socket.id] = { 
+        x: randomX, 
+        y: randomY, 
+        avatarImage: '', 
+        name: '',
+        dx: 0,
+        dy: 0
+    };
 
-    // Notify the new player and all existing players
     socket.emit('welcome', { message: "Joined space successfully", id: socket.id });
     io.emit('newPlayer', players);
 
@@ -50,32 +65,43 @@ io.on('connection', (socket) => {
         return false;
     };
 
-    // Log current player positions
-    console.log('Current players:', players);
-
-    // Movement handler
-    socket.on('movePlayer', ({ dx, dy }) => {
+    // Updated movement handler
+    socket.on('movePlayer', ({ dx, dy, x, y }) => {
         const player = players[socket.id];
         if (player) {
-            const newX = Math.max(0, Math.min(player.x + dx, 768));
-            const newY = Math.max(0, Math.min(player.y + dy, 448));
+            const newX = Math.max(0, Math.min(x, 768));
+            const newY = Math.max(0, Math.min(y, 448));
 
             if (!checkCollisionWithGroup({ x: newX, y: newY, size: 32 }, socket.id)) {
                 player.x = newX;
                 player.y = newY;
-                io.emit('newPlayer', players); // Update all clients
+                player.dx = dx;
+                player.dy = dy;
+
+                // Broadcast movement to all other players
+                socket.broadcast.emit('playerMoved', {
+                    id: socket.id,
+                    x: newX,
+                    y: newY,
+                    dx: dx,
+                    dy: dy
+                });
             } else {
                 console.log(`Collision detected for player ${socket.id}`);
-                socket.emit('collision', { x: player.x, y: player.y }); // Notify client
+                socket.emit('collision', { 
+                    x: player.x, 
+                    y: player.y,
+                    dx: 0,
+                    dy: 0
+                });
             }
         }
     });
 
-    // Disconnection handler
     socket.on('disconnect', () => {
         console.log('Player disconnected:', socket.id);
         delete players[socket.id];
-        io.emit('newPlayer', players); // Notify clients about the player leaving
+        io.emit('newPlayer', players);
     });
 });
 

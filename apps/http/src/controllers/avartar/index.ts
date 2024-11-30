@@ -89,8 +89,41 @@ export const getUserInfo = async (req: Request, res: Response) => {
 }
 export const getAllMaps = async (req: Request, res: Response) => {
     try {
-        const maps = await client.map.findMany()
-        res.json(maps)
+        // const maps = await client.map.findMany({
+        //     select: {
+        //         id: true,
+        //         name: true,
+        //         thumbnail: true
+        //     }
+        // })
+        const tempMaps = [
+            {
+                id: '1',
+                thumbnail: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcoKpBgO2hSf7FYCK2zS7OW-MSfxdKiwvj_A&s",
+                name: "Garden"
+            },
+            {
+                id: '2',
+                thumbnail: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcoKpBgO2hSf7FYCK2zS7OW-MSfxdKiwvj_A&s",
+                name: "botanical"
+            },
+            {
+                id: '3',
+                thumbnail: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcoKpBgO2hSf7FYCK2zS7OW-MSfxdKiwvj_A&s",
+                name: "war"
+            },
+            {
+                id: '4',
+                thumbnail: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcoKpBgO2hSf7FYCK2zS7OW-MSfxdKiwvj_A&s",
+                name: "office"
+            },
+            {
+                id: '5',
+                thumbnail: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQcoKpBgO2hSf7FYCK2zS7OW-MSfxdKiwvj_A&s",
+                name: "home"
+            },
+        ]
+        res.json(tempMaps)
     } catch (err) {
         console.log("Something went wrong: ", err)
         res.status(500).json({

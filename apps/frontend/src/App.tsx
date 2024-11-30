@@ -6,6 +6,7 @@ import Signin from './pages/signin'
 import Demo from './pages/Demo'
 import NotFound from './pages/errPage/404'
 import ServerError from './pages/errPage/500'
+import { useEffect } from 'react'
 function App() {
 
   const router = createBrowserRouter([
@@ -40,6 +41,9 @@ function App() {
     },
 
   ])
+  useEffect(() => {
+    document.title = "Meta";
+  }, []);
   return (
     <RouterProvider router={router} />
   )
