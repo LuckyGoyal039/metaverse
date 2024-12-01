@@ -76,6 +76,9 @@ export const getUserInfo = async (req: Request, res: Response) => {
         const user = await client.user.findUnique({
             where: {
                 id: userId
+            },
+            select: {
+                username: true,
             }
         })
         res.json(user)

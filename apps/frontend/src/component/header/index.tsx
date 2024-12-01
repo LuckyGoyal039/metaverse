@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import avatar60 from '../../assets/avatar_60_dancing.png'
 import WorkspacesIcon from '@mui/icons-material/Workspaces';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
@@ -17,6 +17,10 @@ interface HeaderProps {
   tab: string
   setTab: React.Dispatch<React.SetStateAction<string>>;
 }
+interface userProfileSchema {
+  name: string,
+  userName: string
+}
 
 const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
   const navigate = useNavigate();
@@ -28,6 +32,13 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
     modalName: "",
     callback: async () => { },
   })
+  const [userProfile, setUserProfile] = useState<userProfileSchema>({
+    name: "",
+    userName: ""
+  })
+  const hasFetchedUserInfo = useRef(false);
+
+
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -134,7 +145,7 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
         },
         body: JSON.stringify(data)
       })
-      if(!resp.ok){
+      if (!resp.ok) {
         throw Error("Unable to create space")
       }
       const respJson = await resp.json()
@@ -158,6 +169,7 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
   //     const token = localStorage.getItem('token');
   //     const resp = await fetch(url, {
   //       method: "POST",
+
   //       headers: {
   //         Authorization: `Bearer ${token}`,
   //         "Content-Type": "application/json"
@@ -176,6 +188,54 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
   //     console.log(err)
   //   }
   // }
+  function extractNameFromEmail(email: string): string {
+    // if (!email.includes("@")) {
+    //   throw new Error("Invalid email format");
+    // }
+    const namePart = email.split("@")[0];
+    const formattedName = namePart
+      .split(/[\W_]+/)
+      .filter(Boolean)
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+
+    return formattedName ?? "";
+  }
+  const getUserInfo = async () => {
+    if (hasFetchedUserInfo.current) return;
+    hasFetchedUserInfo.current = true;
+    try {
+      const token = localStorage.getItem('token');
+      const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL
+      const url = `${HTTP_SERVER_URL}/user/user-info`
+      const resp = await fetch(url, {
+        headers: {
+          authorization: `Bearer ${token}`
+        }
+      })
+      const respJson = await resp.json();
+      console.log(respJson);
+      if (!respJson.username) {
+        throw Error("cannot get user information");
+      }
+      const user = {
+        name: extractNameFromEmail(respJson?.username),
+        userName: respJson?.username,
+      }
+      setUserProfile(user)
+
+    } catch (err) {
+      console.log("unable to fetch user info: ", err)
+      toast.error("Please Login to continue.", {
+        position: 'top-center'
+      })
+      navigate('/signin')
+    }
+  }
+
+  useEffect(() => {
+    getUserInfo()
+  }, [])
 
   return (
     <header>
@@ -214,8 +274,8 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
                   <div className="p-4">
                     <div onClick={toggleEditName}>
                       <div className="text-white font-medium mb-1">Profile</div>
-                      <div className="text-lg text-white font-semibold mb-1">lucky</div>
-                      <div className="text-gray-400 text-sm mb-4">wadid47349@inikale.com</div>
+                      <div className="text-lg text-white font-semibold mb-1">{userProfile.name}</div>
+                      <div className="text-gray-400 text-sm mb-4">{userProfile.userName}</div>
                     </div>
 
                     <div className="space-y-2">
