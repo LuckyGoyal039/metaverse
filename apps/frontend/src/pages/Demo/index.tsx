@@ -8,22 +8,22 @@ function Demo() {
     const [data, setData] = useState<any>(null);
     const [usernameEntered, setUsernameEntered] = useState<boolean>(false);
 
-    const fetchData = async (name: string) => {
-        setIsLoading(true);
-        try {
-            const response = await fetch(`/api/getData?username=${name}`);
-            const result = await response.json();
-            setData(result);
-        } catch (error) {
-            console.error("Error fetching data:", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    // const fetchData = async (name: string) => {
+    //     setIsLoading(true);
+    //     try {
+    //         const response = await fetch(`/api/getData?username=${name}`);
+    //         const result = await response.json();
+    //         setData(result);
+    //     } catch (error) {
+    //         console.error("Error fetching data:", error);
+    //     } finally {
+    //         setIsLoading(false);
+    //     }
+    // };
 
     const handleNext = () => {
         if (typeof username.current?.value === 'string' && username.current?.value) {
-            fetchData(username.current.value);
+            // fetchData(username.current.value);
             setUsernameEntered(true);
         } else {
             alert("Please enter a valid name.");
@@ -73,9 +73,9 @@ function Demo() {
             ) : (
                 <div className="flex w-full h-[90vh] justify-center items-center">
                     {data ? (
-                        <SpaceArena />
+                        <SpaceArena playerName={username.current?.value ?? null} />
                     ) : (
-                        <SpaceArena />
+                        <SpaceArena playerName={username.current?.value ?? null} />
                         // <div>No data found</div>
                     )}
                 </div>

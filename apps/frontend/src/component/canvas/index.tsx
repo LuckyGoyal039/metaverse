@@ -12,6 +12,8 @@ interface CanvasProps {
     rows: number;
     cols: number;
     tile_size: number;
+    playerName: string | null
+    room: string
 }
 
 interface SceneState {
@@ -21,7 +23,7 @@ interface SceneState {
     camera: Phaser.Cameras.Scene2D.Camera | null
 }
 
-const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size }) => {
+const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room }) => {
     const gameRef = useRef<Phaser.Game | null>(null);
     const sceneRef = useRef<SceneState>({
         localPlayer: null,
@@ -34,7 +36,7 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size }) => {
         const create = function (this: Phaser.Scene) {
             socket.removeAllListeners();
             const scene = sceneRef.current;
-
+            socket.emit(room == 'demo-room' ? 'joinDemo' : 'joinRoom', { room, name: playerName })
             this.anims.create({
                 key: 'walk-right',
                 frames: this.anims.generateFrameNumbers('player-right', { start: 0, end: 3 }),
@@ -70,19 +72,19 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size }) => {
                 const groundLayer = map.createLayer('ground', tileset, 0, 0);
                 const upperLayer = map.createLayer('upper', tileset, 0, 0);
 
-                if (groundLayer) {
+                if (groundLayer && upperLayer) {
+
                     this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-                }
 
-                scene.localPlayer = this.physics.add.sprite(50, 50, 'player-right', 0);
-                scene.localPlayer.setCollideWorldBounds(true);
+                    scene.localPlayer = this.physics.add.sprite(50, 50, 'player-right', 0);
+                    scene.localPlayer.setCollideWorldBounds(true);
 
-                if (upperLayer) {
+                    if (scene.localPlayer.body)
+                        scene.localPlayer.body.setSize(20, 20);
+
                     upperLayer.setCollisionByProperty({ collides: true });
 
-                    this.physics.add.collider(scene.localPlayer, upperLayer, () => {
-                        console.log('Collision occurred!');
-                    });
+                    this.physics.add.collider(scene.localPlayer, upperLayer);
                 }
             }
 
@@ -137,32 +139,53 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size }) => {
             if (!scene.localPlayer || !scene.cursors) return;
 
             const movement = { dx: 0, dy: 0 };
-            const speed = 2;
-            (scene.localPlayer.body as Phaser.Physics.Arcade.Body).setVelocity(0);
+            const speed = 100;
+            let velocityX = 0;
+            let velocityY = 0;
 
             if (scene.cursors.left.isDown) {
-                movement.dx = -speed;
+                velocityX = -speed;
+                movement.dx = -1;
                 scene.localPlayer.anims.play('walk-left', true);
             } else if (scene.cursors.right.isDown) {
-                movement.dx = speed;
+                velocityX = speed;
+                movement.dx = 1;
                 scene.localPlayer.anims.play('walk-right', true);
-            } else if (scene.cursors.up.isDown) {
-                movement.dy = -speed;
+            }
+
+            if (scene.cursors.up.isDown) {
+                velocityY = -speed;
+                movement.dy = -1;
                 scene.localPlayer.anims.play('walk-up', true);
             } else if (scene.cursors.down.isDown) {
-                movement.dy = speed;
+                velocityY = speed;
+                movement.dy = 1;
                 scene.localPlayer.anims.play('walk-down', true);
-            } else {
+            }
+
+            // Set the velocity
+            (scene.localPlayer.body as Phaser.Physics.Arcade.Body).setVelocity(velocityX, velocityY);
+
+            // Normalize diagonal movement
+            if (velocityX !== 0 && velocityY !== 0) {
+                velocityX *= Math.SQRT1_2;
+                velocityY *= Math.SQRT1_2;
+                (scene.localPlayer.body as Phaser.Physics.Arcade.Body).setVelocity(velocityX, velocityY);
+            }
+
+            // Stop animations if not moving
+            if (velocityX === 0 && velocityY === 0) {
                 scene.localPlayer.anims.stop();
-                // Set the idle frame (first frame) of the current direction
                 scene.localPlayer.setFrame(0);
             }
 
+            // Emit movement to server
             if (movement.dx || movement.dy) {
                 socket.emit('movePlayer', {
                     ...movement,
                     x: scene.localPlayer.x,
-                    y: scene.localPlayer.y
+                    y: scene.localPlayer.y,
+                    room,
                 });
             }
         };
