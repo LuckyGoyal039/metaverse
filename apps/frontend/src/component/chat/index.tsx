@@ -144,12 +144,8 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
 
     return (
         <div
-            className="fixed bottom-4 right-4 w-[500px] rounded-lg shadow-lg overflow-hidden h-[840px] flex flex-col"
-            style={{
-                backgroundImage: `url(${chatBgImage})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-            }}>
+            className="w-[500px] bg-[#111b21] rounded-lg shadow-lg overflow-hidden h-[840px] flex flex-col"
+        >
             <div className="bg-blue-600 p-3 flex justify-between items-center">
                 <h3 className="text-white font-semibold">
                     Chat Room: {room}
@@ -171,6 +167,11 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
             <div
                 ref={chatContainerRef}
                 className="h-[90%] overflow-y-auto p-4 space-y-2"
+                style={{
+                    backgroundImage: `url(${chatBgImage})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                }}
             >
                 {messages.map((message, index) => (
                     <div
