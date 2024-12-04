@@ -36,7 +36,15 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
         const create = function (this: Phaser.Scene) {
             socket.removeAllListeners();
             const scene = sceneRef.current;
-            socket.emit(room == 'demo-room' ? 'joinDemo' : 'joinRoom', { room, name: playerName })
+            socket.emit(room == 'demo-room' ? 'joinDemo' : 'joinRoom', { room, name: playerName }, (response: { success: boolean }) => {
+                if (response?.success) {
+                    console.log('Successfully joined room');
+                    // setIsJoined(true);
+                } else {
+                    console.log('Failed to join room');
+                    // setIsJoined(false);
+                }
+            })
             this.anims.create({
                 key: 'walk-right',
                 frames: this.anims.generateFrameNumbers('player-right', { start: 0, end: 3 }),
@@ -109,6 +117,8 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
                     }
                 });
             });
+
+
             socket.on('playerMoved', (playerInfo: { id: string; x: number; y: number; dx: number; dy: number }) => {
                 const otherPlayer = scene.otherPlayers[playerInfo.id];
                 if (otherPlayer) {
@@ -131,6 +141,35 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
 
             socket.on('collision', ({ x, y }: { x: number; y: number }) => {
                 scene.localPlayer?.setPosition(x, y);
+            });
+
+            socket.on('updatePlayers', ({ room, players: updatedPlayers }: { room: string; players: Record<string, { x: number; y: number }> }) => {
+                console.log('=== UPDATE PLAYERS DEBUG ===');
+                console.log('Current room:', room);
+                console.log('Updated players received:', updatedPlayers);
+                console.log('Current other players:', scene.otherPlayers);
+
+                // Remove disconnected players
+                Object.keys(scene.otherPlayers).forEach((id) => {
+                    console.log('Checking player:', id);
+                    console.log('Exists in updated players?', !!updatedPlayers[id]);
+
+                    if (!updatedPlayers[id]) {
+                        console.log('Should remove player:', id);
+                        if (scene.otherPlayers[id]) {
+                            console.log('Player object exists, destroying...');
+                            try {
+                                scene.otherPlayers[id].destroy();
+                                delete scene.otherPlayers[id];
+                                console.log('Successfully removed player:', id);
+                            } catch (error) {
+                                console.error('Error removing player:', error);
+                            }
+                        }
+                    }
+                });
+
+                console.log('Players after removal:', scene.otherPlayers);
             });
         };
 
