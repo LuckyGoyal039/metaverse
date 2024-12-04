@@ -59,7 +59,7 @@ io.on('connection', (socket) => {
         };
 
         // Send join confirmation
-        callback({ success: true });
+        // callback({ success: true });
 
         io.to(room).emit('newPlayer', getPlayersInRoom(room));
         socket.to(room).emit('playerJoined', { id: socket.id, name });

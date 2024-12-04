@@ -36,15 +36,7 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
         const create = function (this: Phaser.Scene) {
             socket.removeAllListeners();
             const scene = sceneRef.current;
-            socket.emit(room == 'demo-room' ? 'joinDemo' : 'joinRoom', { room, name: playerName }, (response: { success: boolean }) => {
-                if (response?.success) {
-                    console.log('Successfully joined room');
-                    // setIsJoined(true);
-                } else {
-                    console.log('Failed to join room');
-                    // setIsJoined(false);
-                }
-            })
+            socket.emit(room == 'demo-room' ? 'joinDemo' : 'joinRoom', { room, name: playerName })
             this.anims.create({
                 key: 'walk-right',
                 frames: this.anims.generateFrameNumbers('player-right', { start: 0, end: 3 }),
