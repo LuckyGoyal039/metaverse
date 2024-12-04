@@ -8,7 +8,6 @@ interface Square {
     y: number;
     size: number;
 }
-
 interface Player {
     x: number;
     y: number;
@@ -16,11 +15,18 @@ interface Player {
     name: string;
     dx?: number;
     dy?: number;
+    room: string
+}
+interface ChatMessage {
+    sender: string;
+    content: string;
+    room: string;
 }
 
 let players: Record<string, Player> = {}
 
 const server = http.createServer(app)
+
 const io = new Server(server, {
     cors: {
         origin: "http://localhost:5173"
@@ -32,9 +38,9 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
     console.log('Player connected with socket id:', socket.id);
 
-    //demo room
-    socket.on('joinDemo', (name) => {
-        const room = 'demo-room';
+    socket.on('joinDemo', (data: { room: string; name: string }, callback) => {
+        const room = data.room;
+        const name = data.name;
         socket.join(room);
         console.log(`${name} joined ${room}`);
 
@@ -47,13 +53,24 @@ io.on('connection', (socket) => {
             avatarImage: '',
             name: name || "Unknown",
             dx: 0,
-            dy: 0
+            dy: 0,
+            room: room
         };
+
         io.to(room).emit('newPlayer', getPlayersInRoom(room));
-        socket.to(room).emit('playerJoined', { id: socket.id, name });
+        // socket.to(room).emit('playerJoined', { id: socket.id, name });
+
+        const systemMessage = {
+            id: Math.random().toString(36).substr(2, 9),
+            sender: 'System',
+            content: `${name} has joined the chat`,
+            timestamp: Date.now()
+        };
+
+        io.to(room).emit('chatMessage', systemMessage);
+        callback?.(null);
     });
 
-    // not working 
     socket.on('joinRoom', ({ room, name }) => {
         socket.join(room);
         console.log(`Player ${name} joined room ${room}`);
@@ -67,7 +84,8 @@ io.on('connection', (socket) => {
             avatarImage: '',
             name: name || 'Unknown',
             dx: 0,
-            dy: 0
+            dy: 0,
+            room: room
         };
 
         io.to(room).emit('playerJoined', {
@@ -75,25 +93,6 @@ io.on('connection', (socket) => {
             players: getPlayersInRoom(room),
         });
     });
-    const checkCollisionWithGroup = (squareA: Square, id: string, room: string): boolean => {
-        const playersInRoom = getPlayersInRoom(room);
-        console.log("xxxxxxxxxxxx..........xxxxx", playersInRoom)
-        for (const playerId in playersInRoom) {
-            if (playerId !== id) {
-                const squareB = playersInRoom[playerId];
-                if (
-                    squareA.x < squareB.x + 32 &&
-                    squareA.x + 32 > squareB.x &&
-                    squareA.y < squareB.y + 32 &&
-                    squareA.y + 32 > squareB.y
-                ) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    };
-
 
     socket.on('movePlayer', ({ dx, dy, x, y, room }) => {
         const player = players[socket.id];
@@ -126,9 +125,44 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('sendMessage', (messageData: { content: string; sender: string; room: string }, callback) => {
+        console.log("Received messageData:", messageData);
+
+        const message = {
+            id: Math.random().toString(36).substr(2, 9),
+            sender: messageData.sender,
+            content: messageData.content,
+            timestamp: Date.now()
+        };
+
+        console.log("Broadcasting message:", message);
+
+        // Emit to ALL clients in the room, excluding the sender
+        console.log("#####", socket.rooms);
+        io.to(messageData.room).emit('chatMessage', message);
+
+    });
+
     socket.on('disconnect', () => {
         console.log('Player disconnected:', socket.id);
-        const playerRoom = getPlayerRoom(socket.id);
+        console.log("disconnect call, ...current players: ", players)
+        let playerRoom = ''
+        if (socket.id) {
+            playerRoom = players[socket.id]?.room
+        }
+
+        console.log('Player room:', playerRoom);
+
+        if (playerRoom && players[socket.id]) {
+            const systemMessage = {
+                id: Math.random().toString(36).substr(2, 9),
+                sender: 'System',
+                content: `${players[socket.id].name} has left the chat`,
+                timestamp: Date.now()
+            };
+            io.to(playerRoom).emit('chatMessage', systemMessage);
+        }
+
         if (playerRoom) {
             delete players[socket.id];
             io.to(playerRoom).emit('updatePlayers', {
@@ -137,30 +171,47 @@ io.on('connection', (socket) => {
             });
         }
     });
-    console.log("current players: ", players)
+
+    // socket.on('test', (message) => {
+    //     console.log('message:', message)
+    //     socket.emit('test', message)
+    // })
 });
 
-const getPlayersInRoom = (room: string): Record<string, Player> => {
-    return Object.fromEntries(
+function getPlayersInRoom(room: string): Player[] {
+
+    const data = Object.fromEntries(
         Object.entries(players).filter(([socketId]) => {
             const socket = io.sockets.sockets.get(socketId);
             return socket?.rooms.has(room);
         })
     );
-};
+    // console.log("io:", io)
+    // console.log("ioz:", io.sockets.sockets)
+    console.log("players data###", data)
+    const connections = io.sockets.adapter.rooms.get(room)
+    console.log("my connections $$$$", connections)
+    return Object.values(players).filter(player => player.room === room);
 
-const getPlayerRoom = (socketId: string): string | null => {
-    const socket = io.sockets.sockets.get(socketId);
-    if (socket) {
-        for (const room of socket.rooms) {
-            if (room !== socket.id) {
-                return room;
+}
+
+const checkCollisionWithGroup = (squareA: Square, id: string, room: string): boolean => {
+    const playersInRoom = getPlayersInRoom(room);
+    for (const playerId in playersInRoom) {
+        if (playerId !== id) {
+            const squareB = playersInRoom[playerId];
+            if (
+                squareA.x < squareB.x + 32 &&
+                squareA.x + 32 > squareB.x &&
+                squareA.y < squareB.y + 32 &&
+                squareA.y + 32 > squareB.y
+            ) {
+                return true;
             }
         }
     }
-    return null;
+    return false;
 };
-
 
 const PORT = process.env.PORT || 3002
 server.listen(PORT, () => {

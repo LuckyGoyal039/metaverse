@@ -34,7 +34,7 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
 
     useEffect(() => {
         const create = function (this: Phaser.Scene) {
-            socket.removeAllListeners();
+            
             const scene = sceneRef.current;
             socket.emit(room == 'demo-room' ? 'joinDemo' : 'joinRoom', { room, name: playerName })
             this.anims.create({
@@ -212,7 +212,6 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
             });
         }
 
-        socket.connect();
         gameRef.current = new Phaser.Game({
             type: Phaser.AUTO,
             width: cols * tile_size,
@@ -223,8 +222,8 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
         });
 
         return () => {
-            socket.disconnect();
-            socket.removeAllListeners();
+            // socket.disconnect();
+            // socket.removeAllListeners();
             gameRef.current?.destroy(true);
         };
     }, [rows, cols, tile_size]);
