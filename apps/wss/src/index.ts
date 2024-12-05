@@ -104,24 +104,6 @@ io.on('connection', (socket) => {
             players: getPlayersInRoom(room),
         });
     });
-    const checkCollisionWithGroup = (squareA: Square, id: string, room: string): boolean => {
-        const playersInRoom = getPlayersInRoom(room);
-        for (const playerId in playersInRoom) {
-            if (playerId !== id) {
-                const squareB = playersInRoom[playerId];
-                if (
-                    squareA.x < squareB.x + 32 &&
-                    squareA.x + 32 > squareB.x &&
-                    squareA.y < squareB.y + 32 &&
-                    squareA.y + 32 > squareB.y
-                ) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    };
-
 
     socket.on('movePlayer', ({ dx, dy, x, y, room }) => {
         const player = players[socket.id];
@@ -191,12 +173,14 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log('=== DISCONNECT DEBUG ===');
         console.log('Player disconnected:', socket.id);
+        const allRooms = Array.from(socket.rooms); // Convert Set to Array
+        console.log("user connected to this rooms: ", allRooms)
         console.log("disconnect call, ...current players: ", players)
-        let playerRoom = ''
-        if (socket.id) {
-            playerRoom = players[socket.id]?.room
-        }
 
+        let playerRoom = allRooms[allRooms.length - 1];
+        // if (socket.id) {
+        //     playerRoom = players[socket.id]?.room
+        // }
         console.log('Player room:', playerRoom);
 
         if (playerRoom && players[socket.id]) {
@@ -222,7 +206,7 @@ io.on('connection', (socket) => {
         }
 
     });
-});
+})
 
 function getPlayersInRoom(room: string): Player[] {
 
@@ -266,7 +250,23 @@ const getPlayerRoom = (socketId: string): string | null => {
     }
     return "false";
 };
-
+const checkCollisionWithGroup = (squareA: Square, id: string, room: string): boolean => {
+    const playersInRoom = getPlayersInRoom(room);
+    for (const playerId in playersInRoom) {
+        if (playerId !== id) {
+            const squareB = playersInRoom[playerId];
+            if (
+                squareA.x < squareB.x + 32 &&
+                squareA.x + 32 > squareB.x &&
+                squareA.y < squareB.y + 32 &&
+                squareA.y + 32 > squareB.y
+            ) {
+                return true;
+            }
+        }
+    }
+    return false;
+};
 const PORT = process.env.PORT || 3002
 server.listen(PORT, () => {
     console.log(`websocket running on port: ${PORT}`)
