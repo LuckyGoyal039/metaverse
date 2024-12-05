@@ -18,33 +18,17 @@ interface ChatProps {
 const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isConnected, setIsConnected] = useState(false);
-    const [isJoined, setIsJoined] = useState(false);
+    const [isJoined, setIsJoined] = useState(true);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const messageInputRef = useRef<HTMLTextAreaElement>(null);
     const reconnectAttempts = useRef(0);
     const maxReconnectAttempts = 5;
 
-       const joinRoom = useCallback(() => {
+    const joinRoom = useCallback(() => {
         if (playerName && room && socket.connected) {
             console.log('Attempting to join room:', room);
-            if (room === 'demo-room') {
-                socket.emit('joinDemo', { room, name: playerName }, (err: any) => {
-                    if (err) {
-                        console.error('Error joining demo room:', err);
-                    } else {
-                        setIsJoined(true);
-                    }
-                });
-            } else {
-                socket.emit('joinRoom', { room, name: playerName }, (err: any) => {
-                    if (err) {
-                        console.error('Error joining room:', err);
-                    } else {
-                        setIsJoined(true);
-                    }
-                });
-            }
+            socket.emit(room, playerName);
         }
     }, [playerName, room]);
 
@@ -55,9 +39,6 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
             socket.connect();
         }
     }, []);
-    // const testFunction = () => {
-    //     socket.emit('test', "my lal")
-    // }
 
     useEffect(() => {
         const onConnect = () => {
@@ -87,31 +68,26 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
         };
 
         const onChatMessage = (message: Message) => {
-            console.log('Message received:', message);
-            setMessages(prev => [...prev, message]);
+            if (message.sender !== playerName) {
+                console.log('Message received:', message);
+                setMessages(prev => [...prev, message]);
+            }
         };
-        // socket.on('test', (message) => {
-        //     console.log("message: test", message)
-        // })
+
+        if (!socket.connected) {
+            socket.connect();
+        }
+
         socket.on('connect', onConnect);
         socket.on('disconnect', onDisconnect);
         socket.on('connect_error', onConnectError);
         socket.on('chatMessage', onChatMessage);
-
-
-        // Try to join room if socket is already connected
-        if (socket.connected) {
-            joinRoom();
-        }
 
         return () => {
             socket.off('connect', onConnect);
             socket.off('disconnect', onDisconnect);
             socket.off('connect_error', onConnectError);
             socket.off('chatMessage', onChatMessage);
-            // socket.off('test', (message) => {
-            //     console.log("message: test", message)
-            // })
         };
     }, [playerName, joinRoom, reconnect]);
 
@@ -121,7 +97,7 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
 
     const handleSendMessage = (e: React.FormEvent) => {
         e.preventDefault();
-        const messageContent = messageInputRef.current?.value.trim();
+        const messageContent = messageInputRef.current?.value.trim(); // Access input value via ref
 
         if (!messageContent || !playerName) {
             console.log('Cannot send message:', {
@@ -141,20 +117,22 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
 
         console.log('Sending message:', messageData);
 
-        socket.emit('sendMessage', messageData);
+        socket.emit('sendMessage', messageData, (err: Error | null, response: { success: boolean, message?: Message }) => {
+            if (err) {
+                console.error('Message send timeout:', err);
+                return;
+            }
 
-        // Add the message locally
-        const newMessage = {
-            id: Math.random().toString(36).substr(2, 9),
-            sender: playerName,
-            content: messageContent,
-            timestamp: Date.now()
-        };
-        setMessages(prev => [...prev, newMessage]);
-
-        if (messageInputRef.current) {
-            messageInputRef.current.value = '';
-        }
+            if (response?.success && response?.message) {
+                const newMessage: Message = response.message;
+                setMessages((prev) => [...prev, newMessage]);
+                if (messageInputRef.current) {
+                    messageInputRef.current.value = '';
+                }
+            } else {
+                console.error('Failed to send message');
+            }
+        });
     };
 
     const formatTimestamp = (timestamp: number) => {
@@ -165,10 +143,9 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
     };
 
     return (
-
-        <div className="w-[500px] bg-[#111b21] rounded-lg shadow-lg overflow-hidden h-[840px] flex flex-col">
-            {/* Rest of the JSX remains the same */}
-            {/* <button onClick={testFunction} className='absolute'>Test it</button> */}
+        <div
+            className="w-[500px] bg-[#111b21] rounded-lg shadow-lg overflow-hidden h-[840px] flex flex-col"
+        >
             <div className="bg-blue-600 p-3 flex justify-between items-center">
                 <h3 className="text-white font-semibold">
                     Chat Room: {room}

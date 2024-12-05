@@ -23,13 +23,21 @@ interface ChatMessage {
     room: string;
 }
 
+interface ChatMessage {
+    sender: string;
+    content: string;
+    room: string;
+}
+
 let players: Record<string, Player> = {}
 
 const server = http.createServer(app)
 
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173"
+        origin: "http://localhost:5173",
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        credentials: true
     },
     pingInterval: 2000,
     pingTimeout: 4000,
@@ -57,8 +65,11 @@ io.on('connection', (socket) => {
             room: room
         };
 
+        // Send join confirmation
+        // callback({ success: true });
+
         io.to(room).emit('newPlayer', getPlayersInRoom(room));
-        // socket.to(room).emit('playerJoined', { id: socket.id, name });
+        socket.to(room).emit('playerJoined', { id: socket.id, name });
 
         const systemMessage = {
             id: Math.random().toString(36).substr(2, 9),
@@ -93,6 +104,24 @@ io.on('connection', (socket) => {
             players: getPlayersInRoom(room),
         });
     });
+    const checkCollisionWithGroup = (squareA: Square, id: string, room: string): boolean => {
+        const playersInRoom = getPlayersInRoom(room);
+        for (const playerId in playersInRoom) {
+            if (playerId !== id) {
+                const squareB = playersInRoom[playerId];
+                if (
+                    squareA.x < squareB.x + 32 &&
+                    squareA.x + 32 > squareB.x &&
+                    squareA.y < squareB.y + 32 &&
+                    squareA.y + 32 > squareB.y
+                ) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+
 
     socket.on('movePlayer', ({ dx, dy, x, y, room }) => {
         const player = players[socket.id];
@@ -125,6 +154,22 @@ io.on('connection', (socket) => {
         }
     });
 
+    // socket.on('sendMessage', (messageData: { content: string; sender: string; room: string }) => {
+    //     console.log("Received messageData:", messageData);
+
+    //     const message = {
+    //         id: Math.random().toString(36).substr(2, 9),
+    //         sender: messageData.sender,
+    //         content: messageData.content,
+    //         timestamp: Date.now()
+    //     };
+
+    //     console.log("Broadcasting message:", message);
+    //     // Emit to all clients in the room, exclude the sender
+    //     socket.to(messageData.room).emit('chatMessage', message);
+
+    // });
+
     socket.on('sendMessage', (messageData: { content: string; sender: string; room: string }, callback) => {
         console.log("Received messageData:", messageData);
 
@@ -136,14 +181,15 @@ io.on('connection', (socket) => {
         };
 
         console.log("Broadcasting message:", message);
-
-        // Emit to ALL clients in the room, excluding the sender
         console.log("#####", socket.rooms);
+        // Emit to ALL clients in the room, including the sender
         io.to(messageData.room).emit('chatMessage', message);
 
+        // Send confirmation back to sender
+        callback({ success: true, message });
     });
-
     socket.on('disconnect', () => {
+        console.log('=== DISCONNECT DEBUG ===');
         console.log('Player disconnected:', socket.id);
         console.log("disconnect call, ...current players: ", players)
         let playerRoom = ''
@@ -165,17 +211,17 @@ io.on('connection', (socket) => {
 
         if (playerRoom) {
             delete players[socket.id];
+            const playersInRoom = getPlayersInRoom(playerRoom);
+            console.log('Players after removal:', playersInRoom);
+            console.log('Emitting updatePlayers event to room:', playerRoom);
+
             io.to(playerRoom).emit('updatePlayers', {
                 room: playerRoom,
-                players: getPlayersInRoom(playerRoom),
+                players: playersInRoom,
             });
         }
-    });
 
-    // socket.on('test', (message) => {
-    //     console.log('message:', message)
-    //     socket.emit('test', message)
-    // })
+    });
 });
 
 function getPlayersInRoom(room: string): Player[] {
@@ -192,25 +238,33 @@ function getPlayersInRoom(room: string): Player[] {
     const connections = io.sockets.adapter.rooms.get(room)
     console.log("my connections $$$$", connections)
     return Object.values(players).filter(player => player.room === room);
-
 }
+const getPlayerRoom = (socketId: string): string | null => {
+    console.log("socketId", socketId);
+    const allSockets = Array.from(io.sockets.adapter.sids.get(socketId) || []);
+    console.log("******: ", allSockets)
+    // const myRooms = io.sockets.manager.roomClients[socketId]
+    // console.log("myrooms: ", myRooms)
+    const socket = io.sockets.sockets.get(socketId);
+    console.log("socket detials:", socket);
+    if (socket) {
+        // Log all rooms for debugging
+        console.log('All rooms for socket:', Array.from(socket.rooms));
 
-const checkCollisionWithGroup = (squareA: Square, id: string, room: string): boolean => {
-    const playersInRoom = getPlayersInRoom(room);
-    for (const playerId in playersInRoom) {
-        if (playerId !== id) {
-            const squareB = playersInRoom[playerId];
-            if (
-                squareA.x < squareB.x + 32 &&
-                squareA.x + 32 > squareB.x &&
-                squareA.y < squareB.y + 32 &&
-                squareA.y + 32 > squareB.y
-            ) {
-                return true;
+        // Find the room that isn't the socket ID
+        for (const room of socket.rooms) {
+            console.log('Checking room:', room);
+            if (room !== socketId && room !== undefined) {
+                return room;
             }
         }
+
+        // If we're here, check if the player is in the demo room
+        // if (players[socketId]?.name?.room === 'demo-room') {
+        //     return 'demo-room';
+        // }
     }
-    return false;
+    return "false";
 };
 
 const PORT = process.env.PORT || 3002

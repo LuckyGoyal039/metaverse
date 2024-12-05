@@ -1,6 +1,6 @@
-import { io } from 'socket.io-client'
+import { io } from 'socket.io-client';
 
-const SOCKET_SERVER_URL = import.meta.env.VITE_SOCKET_SERVER_URL
+const SOCKET_SERVER_URL = import.meta.env.VITE_SOCKET_SERVER_URL;
 
 export const socket = io(SOCKET_SERVER_URL, {
     autoConnect: false,
@@ -9,6 +9,7 @@ export const socket = io(SOCKET_SERVER_URL, {
     reconnectionDelay: 1000,
 });
 
+// Add connection event listeners
 socket.on('connect', () => {
     console.log('Socket connected:', socket.id);
 });
