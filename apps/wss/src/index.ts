@@ -182,7 +182,11 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log('=== DISCONNECT DEBUG ===');
         console.log('Player disconnected:', socket.id);
-        const playerRoom = getPlayerRoom(socket.id);
+        // const playerRoom = getPlayerRoom(socket.id);
+        const allRooms = Array.from(socket.rooms);
+        console.log(socket.rooms)
+        //my room give empty set that's why i hardcode the room but is temperary (i put the room in my inmemory players but when i do that the multiplayers is not working please check this may their is any mismatch of players type in frontend and backend)
+        const playerRoom = 'demo-room'
         console.log('Player room:', playerRoom);
         // console.log('Players before removal:', players);
 
@@ -204,7 +208,7 @@ io.on('connection', (socket) => {
             console.log('Emitting updatePlayers event to room:', playerRoom);
 
             io.to(playerRoom).emit('updatePlayers', {
-                room: playerRoom,
+                // room: playerRoom,
                 players: playersInRoom,
             });
         }

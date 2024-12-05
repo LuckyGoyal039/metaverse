@@ -135,33 +135,13 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
                 scene.localPlayer?.setPosition(x, y);
             });
 
-            socket.on('updatePlayers', ({ room, players: updatedPlayers }: { room: string; players: Record<string, { x: number; y: number }> }) => {
-                console.log('=== UPDATE PLAYERS DEBUG ===');
-                console.log('Current room:', room);
-                console.log('Updated players received:', updatedPlayers);
-                console.log('Current other players:', scene.otherPlayers);
-
-                // Remove disconnected players
+            socket.on('updatePlayers', (players: Record<string, { x: number; y: number }>) => {
                 Object.keys(scene.otherPlayers).forEach((id) => {
-                    console.log('Checking player:', id);
-                    console.log('Exists in updated players?', !!updatedPlayers[id]);
-
-                    if (!updatedPlayers[id]) {
-                        console.log('Should remove player:', id);
-                        if (scene.otherPlayers[id]) {
-                            console.log('Player object exists, destroying...');
-                            try {
-                                scene.otherPlayers[id].destroy();
-                                delete scene.otherPlayers[id];
-                                console.log('Successfully removed player:', id);
-                            } catch (error) {
-                                console.error('Error removing player:', error);
-                            }
-                        }
+                    if (!players[id]) {
+                        scene.otherPlayers[id].destroy();
+                        delete scene.otherPlayers[id];
                     }
                 });
-
-                console.log('Players after removal:', scene.otherPlayers);
             });
         };
 
