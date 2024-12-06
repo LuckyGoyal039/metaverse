@@ -74,14 +74,14 @@ const Signin: React.FC = () => {
 
 
     return (
-        <section className="bg-gray-50 dark:bg-gray-900">
+        <section className="bg-gray-50 dark:bg-[#282d4e]">
             <ToastContainer />
             <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
                 <button className="flex items-center mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
-                    <img className="w-8 h-8 mr-2" src={avatar60} alt="logo" />
+                    <img className="w-8 h-12 mr-2" src={avatar60} alt="logo" />
                     Welcome Back to Meta
                 </button>
-                <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+                <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-[#2e376e] dark:border-gray-700">
                     <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
                         <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white text-center">
                             Sign In
@@ -116,10 +116,13 @@ const Signin: React.FC = () => {
                                     required
                                 />
                             </div>
-                            <button onClick={() => navigateTo('/')} type="button" className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none dark:focus:ring-red-800">Back to Home</button>
-                            <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700"> {isLoading ? <Spinner /> : "Sign In"}</button>
+                            <div className='flex gap-3 items-center'>
+                                <button onClick={() => navigateTo('/')} type="button" className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm h-12 px-3 dark:bg-red-600 dark:hover:bg-red-700 focus:outline-none dark:focus:ring-red-800">Back to Home</button>
+
+                                <button type="submit" className="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm h-12 w-24 dark:bg-blue-600 dark:hover:bg-blue-700"> {isLoading ? <Spinner /> : "Sign In"}</button>
+                            </div>
                             <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                                Don't have an account? <button onClick={() => navigateTo('/signup')} className="font-medium text-primary-600 hover:underline dark:text-primary-500 text-blue-500">Sign up here</button>
+                                Don't have an account? <button onClick={() => navigateTo('/signup')} className="font-medium text-primary-600 hover:underline dark:text-primary-400 text-blue-500">Sign up here</button>
                             </p>
                         </form>
                     </div>
