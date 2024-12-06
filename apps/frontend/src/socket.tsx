@@ -8,16 +8,3 @@ export const socket = io(SOCKET_SERVER_URL, {
     reconnectionAttempts: 5,
     reconnectionDelay: 1000,
 });
-
-// Add connection event listeners
-socket.on('connect', () => {
-    console.log('Socket connected:', socket.id);
-});
-
-socket.on('connect_error', (error) => {
-    console.error('Socket connection error:', error);
-});
-
-socket.on('disconnect', () => {
-    console.log('Socket disconnected');
-});
