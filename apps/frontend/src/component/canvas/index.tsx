@@ -34,7 +34,7 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
 
     useEffect(() => {
         const create = function (this: Phaser.Scene) {
-            socket.removeAllListeners();
+
             const scene = sceneRef.current;
             socket.emit(room == 'demo-room' ? 'joinDemo' : 'joinRoom', { room, name: playerName })
             this.anims.create({
@@ -109,6 +109,27 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
                     }
                 });
             });
+            socket.on('updatePlayers', (players: Record<string, { x: number; y: number }>) => {
+                // Object.entries(players).forEach(([id, { x, y }]) => {
+                //     if (id === socket.id) {
+                //         scene.localPlayer?.setPosition(x, y);
+                //     } else if (!scene.otherPlayers[id]) {
+                //         scene.otherPlayers[id] = this.physics.add.sprite(x, y, 'player-right', 0);
+                //     } else {
+                //         scene.otherPlayers[id].setPosition(x, y);
+                //     }
+                // });
+                console.log("update the players:")
+                console.log("before: ", scene.otherPlayers)
+                Object.keys(scene.otherPlayers).forEach((id) => {
+                    if (!players[id]) {
+                        // Player not in the updated list, remove them
+                        scene.otherPlayers[id].destroy(); // Destroy sprite
+                        delete scene.otherPlayers[id]; // Remove from the list
+                    }
+                });
+                console.log("after: ", scene.otherPlayers)
+            });
             socket.on('playerMoved', (playerInfo: { id: string; x: number; y: number; dx: number; dy: number }) => {
                 const otherPlayer = scene.otherPlayers[playerInfo.id];
                 if (otherPlayer) {
@@ -131,6 +152,35 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
 
             socket.on('collision', ({ x, y }: { x: number; y: number }) => {
                 scene.localPlayer?.setPosition(x, y);
+            });
+
+            socket.on('updatePlayers', ({ room, players: updatedPlayers }: { room: string; players: Record<string, { x: number; y: number }> }) => {
+                console.log('=== UPDATE PLAYERS DEBUG ===');
+                console.log('Current room:', room);
+                console.log('Updated players received:', updatedPlayers);
+                console.log('Current other players:', scene.otherPlayers);
+
+                // Remove disconnected players
+                Object.keys(scene.otherPlayers).forEach((id) => {
+                    console.log('Checking player:', id);
+                    console.log('Exists in updated players?', !!updatedPlayers[id]);
+
+                    if (!updatedPlayers[id]) {
+                        console.log('Should remove player:', id);
+                        if (scene.otherPlayers[id]) {
+                            console.log('Player object exists, destroying...');
+                            try {
+                                scene.otherPlayers[id].destroy();
+                                delete scene.otherPlayers[id];
+                                console.log('Successfully removed player:', id);
+                            } catch (error) {
+                                console.error('Error removing player:', error);
+                            }
+                        }
+                    }
+                });
+
+                console.log('Players after removal:', scene.otherPlayers);
             });
         };
 
@@ -212,7 +262,6 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
             });
         }
 
-        socket.connect();
         gameRef.current = new Phaser.Game({
             type: Phaser.AUTO,
             width: cols * tile_size,
@@ -223,8 +272,8 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
         });
 
         return () => {
-            socket.disconnect();
-            socket.removeAllListeners();
+            // socket.disconnect();
+            // socket.removeAllListeners();
             gameRef.current?.destroy(true);
         };
     }, [rows, cols, tile_size]);

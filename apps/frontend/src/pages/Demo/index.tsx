@@ -71,7 +71,7 @@ function Demo() {
                     </div>
                 </form>
             ) : (
-                <div className="flex w-full h-[90vh] justify-center items-center">
+                <div className="w-full h-[90vh]">
                     {data ? (
                         <SpaceArena playerName={username.current?.value ?? null} />
                     ) : (
