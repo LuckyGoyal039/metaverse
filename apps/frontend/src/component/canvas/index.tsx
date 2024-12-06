@@ -109,6 +109,8 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
                     }
                 });
             });
+
+
             socket.on('playerMoved', (playerInfo: { id: string; x: number; y: number; dx: number; dy: number }) => {
                 const otherPlayer = scene.otherPlayers[playerInfo.id];
                 if (otherPlayer) {
@@ -131,6 +133,15 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
 
             socket.on('collision', ({ x, y }: { x: number; y: number }) => {
                 scene.localPlayer?.setPosition(x, y);
+            });
+
+            socket.on('updatePlayers', (players: Record<string, { x: number; y: number }>) => {
+                Object.keys(scene.otherPlayers).forEach((id) => {
+                    if (!players[id]) {
+                        scene.otherPlayers[id].destroy();
+                        delete scene.otherPlayers[id];
+                    }
+                });
             });
         };
 

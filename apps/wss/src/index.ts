@@ -18,12 +18,20 @@ interface Player {
     dy?: number;
 }
 
+interface ChatMessage {
+    sender: string;
+    content: string;
+    room: string;
+}
+
 let players: Record<string, Player> = {}
 
 const server = http.createServer(app)
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173"
+        origin: "http://localhost:5173",
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        credentials: true
     },
     pingInterval: 2000,
     pingTimeout: 4000,
@@ -33,7 +41,7 @@ io.on('connection', (socket) => {
     console.log('Player connected with socket id:', socket.id);
 
     //demo room
-    socket.on('joinDemo', (name) => {
+    socket.on('joinDemo', (name, callback) => {
         const room = 'demo-room';
         socket.join(room);
         console.log(`${name} joined ${room}`);
@@ -49,8 +57,21 @@ io.on('connection', (socket) => {
             dx: 0,
             dy: 0
         };
+
+        // Send join confirmation
+        // callback({ success: true });
+
         io.to(room).emit('newPlayer', getPlayersInRoom(room));
         socket.to(room).emit('playerJoined', { id: socket.id, name });
+
+        const systemMessage = {
+            id: Math.random().toString(36).substr(2, 9),
+            sender: 'System',
+            content: `${name} has joined the chat`,
+            timestamp: Date.now()
+        };
+
+        io.to('demo-room').emit('chatMessage', systemMessage);
     });
 
     // not working 
@@ -77,7 +98,6 @@ io.on('connection', (socket) => {
     });
     const checkCollisionWithGroup = (squareA: Square, id: string, room: string): boolean => {
         const playersInRoom = getPlayersInRoom(room);
-        console.log("xxxxxxxxxxxx..........xxxxx", playersInRoom)
         for (const playerId in playersInRoom) {
             if (playerId !== id) {
                 const squareB = playersInRoom[playerId];
@@ -126,18 +146,74 @@ io.on('connection', (socket) => {
         }
     });
 
+    // socket.on('sendMessage', (messageData: { content: string; sender: string; room: string }) => {
+    //     console.log("Received messageData:", messageData);
+
+    //     const message = {
+    //         id: Math.random().toString(36).substr(2, 9),
+    //         sender: messageData.sender,
+    //         content: messageData.content,
+    //         timestamp: Date.now()
+    //     };
+
+    //     console.log("Broadcasting message:", message);
+    //     // Emit to all clients in the room, exclude the sender
+    //     socket.to(messageData.room).emit('chatMessage', message);
+
+    // });
+
+    socket.on('sendMessage', (messageData: { content: string; sender: string; room: string }, callback) => {
+        console.log("Received messageData:", messageData);
+
+        const message = {
+            id: Math.random().toString(36).substr(2, 9),
+            sender: messageData.sender,
+            content: messageData.content,
+            timestamp: Date.now()
+        };
+
+        console.log("Broadcasting message:", message);
+        // Emit to ALL clients in the room, including the sender
+        io.to(messageData.room).emit('chatMessage', message);
+
+        // Send confirmation back to sender
+        callback({ success: true, message });
+    });
     socket.on('disconnect', () => {
+        console.log('=== DISCONNECT DEBUG ===');
         console.log('Player disconnected:', socket.id);
-        const playerRoom = getPlayerRoom(socket.id);
+        // const playerRoom = getPlayerRoom(socket.id);
+        const allRooms = Array.from(socket.rooms);
+        console.log(socket.rooms)
+        //my room give empty set that's why i hardcode the room but is temperary (i put the room in my inmemory players but when i do that the multiplayers is not working please check this may their is any mismatch of players type in frontend and backend)
+        const playerRoom = 'demo-room'
+        console.log('Player room:', playerRoom);
+        // console.log('Players before removal:', players);
+
+        if (playerRoom && players[socket.id]) {
+            const systemMessage = {
+                id: Math.random().toString(36).substr(2, 9),
+                sender: 'System',
+                content: `${players[socket.id].name} has left the chat`,
+                timestamp: Date.now()
+            };
+            io.to(playerRoom).emit('chatMessage', systemMessage);
+        }
+
+
         if (playerRoom) {
             delete players[socket.id];
+            const playersInRoom = getPlayersInRoom(playerRoom);
+            console.log('Players after removal:', playersInRoom);
+            console.log('Emitting updatePlayers event to room:', playerRoom);
+
             io.to(playerRoom).emit('updatePlayers', {
-                room: playerRoom,
-                players: getPlayersInRoom(playerRoom),
+                // room: playerRoom,
+                players: playersInRoom,
             });
         }
+
     });
-    console.log("current players: ", players)
 });
 
 const getPlayersInRoom = (room: string): Record<string, Player> => {
@@ -150,13 +226,29 @@ const getPlayersInRoom = (room: string): Record<string, Player> => {
 };
 
 const getPlayerRoom = (socketId: string): string | null => {
+    console.log("socketId", socketId);
+    const allSockets = Array.from(io.sockets.adapter.sids.get(socketId) || []);
+    console.log("******: ", allSockets)
+    // const myRooms = io.sockets.manager.roomClients[socketId]
+    // console.log("myrooms: ", myRooms)
     const socket = io.sockets.sockets.get(socketId);
+    console.log("socket detials:", socket);
     if (socket) {
+        // Log all rooms for debugging
+        console.log('All rooms for socket:', Array.from(socket.rooms));
+
+        // Find the room that isn't the socket ID
         for (const room of socket.rooms) {
-            if (room !== socket.id) {
+            console.log('Checking room:', room);
+            if (room !== socketId && room !== undefined) {
                 return room;
             }
         }
+
+        // If we're here, check if the player is in the demo room
+        // if (players[socketId]?.name?.room === 'demo-room') {
+        //     return 'demo-room';
+        // }
     }
     return null;
 };
