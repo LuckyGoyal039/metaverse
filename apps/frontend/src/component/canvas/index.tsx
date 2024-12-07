@@ -223,7 +223,6 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
             });
         }
 
-        socket.connect();
         gameRef.current = new Phaser.Game({
             type: Phaser.AUTO,
             width: cols * tile_size,
@@ -234,7 +233,6 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
         });
 
         return () => {
-            socket.disconnect();
             socket.removeAllListeners();
             gameRef.current?.destroy(true);
         };

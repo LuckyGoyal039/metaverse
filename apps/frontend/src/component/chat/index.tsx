@@ -21,7 +21,7 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
     const [isJoined, setIsJoined] = useState(true);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
-    const messageInputRef = useRef<HTMLTextAreaElement>(null);
+    const messageInputRef = useRef<HTMLInputElement>(null);
     const reconnectAttempts = useRef(0);
     const maxReconnectAttempts = 5;
 
@@ -145,16 +145,16 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
 
     return (
         <div
-            className="w-[500px] bg-[#111b21] rounded-lg shadow-lg overflow-hidden h-[840px] flex flex-col"
+            className="bg-[#111b21] rounded-lg overflow-hidden flex flex-col h-full"
         >
-            <div className="bg-blue-600 p-3 flex justify-between items-center">
+            <div className="bg-blue-600 p-3 flex justify-between items-center h-[8%] overflow-hidden">
                 <h3 className="text-white font-semibold">
                     Chat Room: {room}
                     {!isJoined && isConnected && " (Joining...)"}
                 </h3>
                 <div className="flex items-center gap-2">
                     <span
-                        className={`w-3 h-3 rounded-full ${isConnected && isJoined ? 'bg-green-400' :
+                        className={`w-3 min-h-3 rounded-full ${isConnected && isJoined ? 'bg-green-400' :
                             isConnected ? 'bg-yellow-400' : 'bg-red-400'
                             }`}
                         title={
@@ -167,7 +167,7 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
 
             <div
                 ref={chatContainerRef}
-                className="h-[90%] overflow-y-auto p-4 space-y-2"
+                className=" overflow-y-auto p-4 space-y-2 h-[82%] overflow-hidden"
                 style={{
                     backgroundImage: `url(${chatBgImage})`,
                     backgroundSize: 'cover',
@@ -208,9 +208,9 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
 
             <form
                 onSubmit={handleSendMessage}
-                className="border-t p-3 flex gap-2 items-center"
+                className="border-t p-3 flex gap-2 items-center h-[10%] overflow-hidden"
             >
-                <textarea
+                <input
                     ref={messageInputRef}
                     placeholder={
                         !isConnected ? "Connecting..." :
@@ -218,12 +218,12 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
                                 "Type a message..."
                     }
                     disabled={!isConnected || !isJoined}
-                    className="flex-1 px-3 py-2 border rounded-md disabled:opacity-50 bg-[#202c33] text-white max-h-16 "
+                    className="flex-1 px-3 py-2 border rounded-md disabled:opacity-50 bg-[#202c33] text-white max-h-16 focus:outline-none"
                 />
                 <button
                     type="submit"
                     disabled={!isConnected || !isJoined}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 h-10"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 h-10"
                 >
                     Send
                 </button>
