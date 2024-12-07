@@ -5,7 +5,7 @@ import MySpace from "../../component/mySpace";
 import { ToastContainer } from "react-toastify";
 
 function Home() {
-    const [tab, setTab] = useState('event')
+    const [tab, setTab] = useState('space')
     return (
         <>
             <ToastContainer />
