@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import avatar60 from '../../assets/avatar_60_dancing.png';
 import Spinner from '../../component/spinner';
 import { toast, ToastContainer } from 'react-toastify';
@@ -11,6 +11,7 @@ interface FormData {
 
 const Signin: React.FC = () => {
     const navigate = useNavigate();
+    const localtion = useLocation()
     const [formData, setFormData] = useState<FormData>({
         username: '',
         password: '',
@@ -71,8 +72,19 @@ const Signin: React.FC = () => {
             setIsLoading(false)
         }
     };
-
-
+    useEffect(() => {
+        const success = localtion.state?.success
+        const message = localtion.state?.message
+        if (!success && message) {
+            toast.error(message, {
+                position: 'top-center'
+            })
+        } else if (success && message) {
+            toast.success(message, {
+                position: 'top-center'
+            })
+        }
+    }, [])
     return (
         <section className="bg-gray-50 dark:bg-[#282d4e]">
             <ToastContainer />

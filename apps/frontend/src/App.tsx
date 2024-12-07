@@ -7,6 +7,7 @@ import Demo from './pages/Demo'
 import NotFound from './pages/errPage/404'
 import ServerError from './pages/errPage/500'
 import { useEffect } from 'react'
+import Room from './component/room'
 function App() {
 
   const router = createBrowserRouter([
@@ -39,6 +40,10 @@ function App() {
       path: "/500",
       element: <ServerError />
     },
+    {
+      path: '/join-space',
+      element: <Room />
+    }
 
   ])
   useEffect(() => {

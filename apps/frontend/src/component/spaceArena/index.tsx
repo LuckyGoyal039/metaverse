@@ -4,13 +4,13 @@ import Chat from '../chat';
 
 interface SpaceArenaProps {
     playerName: string | null
+    room?: string
 }
 
-const SpaceArena: React.FC<SpaceArenaProps> = ({ playerName }) => {
+const SpaceArena: React.FC<SpaceArenaProps> = ({ playerName, room = "demo-room" }) => {
     const ROWS = useRef(20);
     const COLS = useRef(35);
     const TILE_SIZE = useRef(32);
-    const room = "demo-room";
 
     return (
         <>

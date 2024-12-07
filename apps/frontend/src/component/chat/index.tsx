@@ -68,6 +68,7 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
         };
 
         const onChatMessage = (message: Message) => {
+            console.log("onChatmessage is called")
             if (message.sender !== playerName) {
                 console.log('Message received:', message);
                 setMessages(prev => [...prev, message]);
@@ -89,7 +90,7 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
             socket.off('connect_error', onConnectError);
             socket.off('chatMessage', onChatMessage);
         };
-    }, [playerName, joinRoom, reconnect]);
+    }, [playerName]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

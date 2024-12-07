@@ -52,14 +52,12 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab, parentReload }) => {
       const token = localStorage.getItem('token');
       localStorage.removeItem('token');
       const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL
-      const url = `${HTTP_SERVER_URL}/sign-out`
+      const url = `${HTTP_SERVER_URL}/user/sign-out`
       await fetch(url, {
-        method: "POST",
+        method: "GET",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(token)
       })
       toast.success("Signout Successfully", {
         position: "top-center"

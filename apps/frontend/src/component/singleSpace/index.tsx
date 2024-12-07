@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 interface SingleSpaceProps {
     backgroundImg: string;
@@ -12,6 +13,7 @@ interface SingleSpaceProps {
 }
 const SingleSpace: React.FC<SingleSpaceProps> = ({ backgroundImg, spaceName, createDate, copyUrl }) => {
     const [isHovered, setIsHovered] = useState(false);
+    const navigate = useNavigate();
     const handleCopy = async () => {
         try {
             await navigator.clipboard.writeText(copyUrl);
@@ -27,9 +29,12 @@ const SingleSpace: React.FC<SingleSpaceProps> = ({ backgroundImg, spaceName, cre
     };
     const handleJoinRoom = () => {
         try {
-            toast.success("Join Space Functionality is unavailable", {
-                position: "top-center"
-            })
+            const HTTP_SERVER = import.meta.env.VITE_HTTP_SERVER_URL
+            const url = `/join-space?id='${copyUrl}'`
+            navigate(url);
+            // toast.success("Join Space Functionality is unavailable", {
+            //     position: "top-center"
+            // })
         } catch (err) {
             toast.error("unable to join room", {
                 position: "top-center"
@@ -55,11 +60,12 @@ const SingleSpace: React.FC<SingleSpaceProps> = ({ backgroundImg, spaceName, cre
                 style={{ backgroundImage: `url(${backgroundImg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
+                onClick={handleJoinRoom}
             >
                 {
                     isHovered &&
                     <div className='rounded-full bg-[#151e10] p-3'>
-                        <LogoutIcon className='!text-3xl' onClick={handleJoinRoom} />
+                        <LogoutIcon className='!text-3xl' />
                     </div>
                 }
             </div>
