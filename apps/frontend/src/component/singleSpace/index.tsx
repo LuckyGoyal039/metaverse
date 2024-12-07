@@ -36,6 +36,18 @@ const SingleSpace: React.FC<SingleSpaceProps> = ({ backgroundImg, spaceName, cre
             })
         }
     }
+
+    const formatDate = (unFormateDate: string) => {
+        const date = new Date(unFormateDate);
+        const options: Intl.DateTimeFormatOptions = { month: 'short' };
+        const month = new Intl.DateTimeFormat('en-US', options).format(date);
+        const day = String(date.getDate()).padStart(2, '0');
+        const year = date.getFullYear();
+
+        return `${month}, ${day} ${year}`;
+
+        return `${day}-${month}-${year}`;
+    };
     return (
         <div className='flex flex-col gap-2'>
             <div
@@ -56,7 +68,7 @@ const SingleSpace: React.FC<SingleSpaceProps> = ({ backgroundImg, spaceName, cre
                     <p>{spaceName}</p>
                 </div>
                 <div className='flex gap-3'>
-                    <p>{createDate}</p>
+                    <p>{formatDate(createDate)}</p>
                     <ContentCopyIcon onClick={handleCopy} className='cursor-pointer text-gray-500' />
                 </div>
             </div>

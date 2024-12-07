@@ -9,7 +9,9 @@ interface mySpaceInterface {
     name: string;
     thumbnail: string;
     dimensions: string;
+    createdAt: string
 }
+
 const MySpace: React.FC = () => {
 
     const [mySpaces, setMySpaces] = useState([])
@@ -35,6 +37,7 @@ const MySpace: React.FC = () => {
                     Authorization: `Bearer ${token}`
                 }
             })
+
             const respJson = await resp.json();
             console.log(respJson);
             setMySpaces(respJson)
@@ -74,10 +77,10 @@ const MySpace: React.FC = () => {
                 loading && <WaitingPage />
             }
             {
-                filterData && <div className="w-full pt-2 pl-12">
-                    <ul className="w-full flex gap-5">
+                filterData && <div className="w-full pt-2">
+                    <ul className="w-full flex gap-12 flex-wrap pl-12">
                         {filterData.map((user: mySpaceInterface) => (
-                            <SingleSpace key={user.id} backgroundImg={'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTh5bElz8R6LVIgd6GDEpC29hrva1ql4TCNqA&s'} spaceName={user.name} createDate={"today"} copyUrl="somedandomurl" />
+                            <SingleSpace key={user.id} backgroundImg={'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTh5bElz8R6LVIgd6GDEpC29hrva1ql4TCNqA&s'} spaceName={user.name} createDate={user.createdAt} copyUrl="somedandomurl" />
                         ))}
                     </ul>
                 </div>

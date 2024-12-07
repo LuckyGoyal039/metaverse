@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import CloseIcon from '@mui/icons-material/Close';
 import { CreateAvatarDataSchema, CreateElementDataSchema, CreateMapDataSchema, CreateSpaceDataSchema, CustomModalProps } from "../../types";
 import CustomDropdownWithImage from "../customDropdown/dropdownWithImage";
+import Spinner from "../spinner";
+import { toast } from "react-toastify";
 
 // interface MapsDataSchema {
 //     id: string,
@@ -15,6 +17,8 @@ interface MapsDataSchema {
     name: string,
     thumbnail: string,
 }
+
+type formDataSchema = CreateAvatarDataSchema | CreateElementDataSchema | CreateMapDataSchema | CreateSpaceDataSchema
 
 const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMapDataSchema | CreateAvatarDataSchema | CreateSpaceDataSchema
 >> = ({ modalName, cancel, callback }) => {
@@ -41,8 +45,8 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
     });
     const [elementList, setElementList] = useState([])
     const [mapList, setMapList] = useState([])
-
-    // const [selectedMap, setSelectedMap] = useState<MapsDataSchema | null>(null);
+    const [selectedMap, setSelectedMap] = useState<string | null>(null)
+    const [loading, setLoading] = useState(false)
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -80,6 +84,7 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
         }));
     };
     const handleMapSelect = (mapId: string) => {
+        setSelectedMap(mapId)
         setCreateSpaceForm((prev) => ({
             ...prev,
             mapId,
@@ -159,6 +164,19 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
             console.log("something went wrong. unable to get the elements")
         }
     }
+
+    const handleSubmit = async (formData: formDataSchema) => {
+        try {
+            setLoading(true)
+            callback(formData)
+        } catch (err) {
+            console.log("submit form error: ", err)
+            toast.error("Cannot submit form", {
+                position: "top-center"
+            })
+        }
+    }
+
     useEffect(() => {
         switch (modalName) {
             case 'create-map': getAllElements()
@@ -244,7 +262,7 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                             Cancel
                         </button>
                         <button
-                            onClick={() => callback(createElementForm)}
+                            onClick={() => handleSubmit(createElementForm)}
                             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600"
                         >
                             Submit
@@ -304,10 +322,10 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                     Cancel
                                 </button>
                                 <button
-                                    onClick={() => callback(createAvatarForm)}
-                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600"
+                                    onClick={() => handleSubmit(createAvatarForm)}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700dark:bg-blue-500 dark:hover:bg-blue-600"
                                 >
-                                    Submit
+                                    {loading ? <Spinner /> : "Submit"}
                                 </button>
                             </div>
                         </div>
@@ -346,8 +364,8 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                     <ul className="flex gap-4 flex-wrap max-h-52 overflow-y-auto px-5">
                                         {
                                             mapList.map((ele: MapsDataSchema) => {
-                                                return <div className="rounded-xl border flex flex-col justify-center text-center text-white 
-                                                hover:border-blue-500 hover:scale-105 transition-all duration-300 "
+                                                return <div className={`rounded-xl border flex flex-col justify-center text-center text-white 
+                                                hover:scale-105 transition-all duration-300 ${selectedMap == ele.id ? "border-blue-500 scale-102" : ""}`}
                                                     key={ele.id}
                                                     onClick={() => handleMapSelect(ele.id)}>
                                                     <div>
@@ -359,36 +377,6 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                         }
                                     </ul>
                                 </div>
-
-                                {/* <div>
-                                    <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Map</label>
-                                    <select
-                                        name="mapId"
-                                        value={createSpaceForm.mapId}
-                                        onChange={handleSpaceChange}
-                                        className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    >
-                                        <option selected disabled >Select Map</option>
-                                        {
-                                            mapList.map((ele: MapsDataSchema) => {
-                                                return <option key={ele.id} value={ele.id}>{ele.name}</option>
-                                            })
-                                        }
-                                    </select>
-                                </div> */}
-                                {/* <div>
-                                    <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Dimension</label>
-                                    <select
-                                        name="dimensions"
-                                        value={createSpaceForm.dimensions}
-                                        onChange={handleSpaceChange}
-                                        className="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    >
-                                        <option value="">Select Dimension</option>
-                                        <option value="2D">2D</option>
-                                        <option value="3D">3D</option>
-                                    </select>
-                                </div> */}
                             </div>
 
                             <div className="flex justify-end space-x-2 p-4 border-t dark:border-gray-700">
@@ -399,10 +387,10 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                     Cancel
                                 </button>
                                 <button
-                                    onClick={() => callback(createSpaceForm)}
-                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600"
+                                    onClick={() => handleSubmit(createSpaceForm)}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600"
                                 >
-                                    Submit
+                                    {loading ? <Spinner /> : "Submit"}
                                 </button>
                             </div>
                         </div>
@@ -513,10 +501,11 @@ const CustomModal: React.FC<CustomModalProps<CreateElementDataSchema | CreateMap
                                     Cancel
                                 </button>
                                 <button
-                                    onClick={() => callback(createMapForm)}
+                                    onClick={() => { handleSubmit(createMapForm) }}
                                     className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 dark:bg-blue-500 dark:hover:bg-blue-600"
                                 >
-                                    Submit
+                                    {loading ? <Spinner /> : "Submit"}
+
                                 </button>
                             </div>
                         </div>
