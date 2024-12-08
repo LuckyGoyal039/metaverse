@@ -62,13 +62,14 @@ io.on('connection', (socket) => {
         const systemMessage = {
             id: Math.random().toString(36).substr(2, 9),
             sender: 'System',
-            content: `${name} has joined the chat`,
-            timestamp: Date.now()
+            content: `${name} joined chat`,
+            timestamp: Date.now(),
+            systemFlag: true
         };
 
         io.to(room).emit('chatMessage', systemMessage);
     });
-    
+
     const checkCollisionWithGroup = (squareA: Square, id: string, room: string): boolean => {
         const playersInRoom = getPlayersInRoom(room);
         for (const playerId in playersInRoom) {
@@ -142,7 +143,8 @@ io.on('connection', (socket) => {
             id: Math.random().toString(36).substr(2, 9),
             sender: messageData.sender,
             content: messageData.content,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            systemFlag: false
         };
 
         console.log("Broadcasting message:", message);
@@ -168,7 +170,8 @@ io.on('connection', (socket) => {
                 id: Math.random().toString(36).substr(2, 9),
                 sender: 'System',
                 content: `${players[socket.id].name} has left the chat`,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                systemFlag: true
             };
             io.to(playerRoom).emit('chatMessage', systemMessage);
         }

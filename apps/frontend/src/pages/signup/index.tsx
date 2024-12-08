@@ -14,7 +14,7 @@ const Signup: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     username: '',
     password: '',
-    type: '',
+    type: 'user',
   });
   const [isLoading, setIsLoading] = useState(false)
 
@@ -124,7 +124,7 @@ const Signup: React.FC = () => {
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-[#282d4e] dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     required
                   >
-                    <option value="user">User</option>
+                    <option value="user" selected>User</option>
                     <option value="admin">Admin</option>
                   </select>
                 </div>
