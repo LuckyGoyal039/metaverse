@@ -16,13 +16,14 @@ import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
 interface HeaderProps {
   tab: string
   setTab: React.Dispatch<React.SetStateAction<string>>;
+  parentReload: () => void
 }
 interface userProfileSchema {
-  name: string,
-  userName: string
+  name: string;
+  userName: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
+const Header: React.FC<HeaderProps> = ({ tab, setTab, parentReload }) => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -51,14 +52,12 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
       const token = localStorage.getItem('token');
       localStorage.removeItem('token');
       const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL
-      const url = `${HTTP_SERVER_URL}/sign-out`
+      const url = `${HTTP_SERVER_URL}/user/sign-out`
       await fetch(url, {
-        method: "POST",
+        method: "GET",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(token)
       })
       toast.success("Signout Successfully", {
         position: "top-center"
@@ -133,7 +132,6 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
   // }
   const createSpace = async (data: CreateSpaceDataSchema) => {
     try {
-      debugger;
       const HTTP_SERVER_URL = import.meta.env.VITE_HTTP_SERVER_URL
       const url = `${HTTP_SERVER_URL}/space`;
       const token = localStorage.getItem('token');
@@ -150,10 +148,11 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab }) => {
       }
       const respJson = await resp.json()
       console.log(respJson)
-      toast.success("Avatar is Created Successfully", {
-        position: "top-center"
-      })
+      // toast.success("Space Created Successfully", {
+      //   position: "top-center"
+      // })
       closeModal();
+      parentReload()
     } catch (err) {
       toast.error("Unable to create Element", {
         position: "top-center"

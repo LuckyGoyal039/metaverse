@@ -58,7 +58,8 @@ export const getBulkAvatarData = async (req: Request, res: Response) => {
 export const SignoUT = async (req: Request, res: Response) => {
     try {
         const { token } = req.body
-        console.log("jwt token: ", token)
+        // console.log("jwt token: ", token)
+        console.log("signout call")
         res.json({
             message: "sign out successfully"
         })
@@ -132,6 +133,15 @@ export const getAllMaps = async (req: Request, res: Response) => {
         res.status(500).json({
             message: "Something went wrong"
         })
+
+    }
+}
+
+export const checkLogin = async (req: Request, res: Response) => {
+    try {
+        console.log('user login check')
+        res.status(200).json({ message: "valid token" })
+    } catch (err) {
 
     }
 }

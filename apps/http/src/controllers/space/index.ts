@@ -83,8 +83,8 @@ export const createSpace = async (req: Request, res: Response) => {
 export const tempCreateSpace = async (req: Request, res: Response) => {
     try {
         console.log('Creating space...');
-        const defaultMapId = '1'; 
-        const defaultDimensions = '500x500'; 
+        const defaultMapId = '1';
+        const defaultDimensions = '500x500';
 
         const parseData = CreateSpaceSchema.safeParse(req.body);
         if (!parseData.success) {
@@ -167,7 +167,6 @@ export const deleteSpace = async (req: Request, res: Response) => {
 
 export const getMySpace = async (req: Request, res: Response) => {
     try {
-        console.log("getSpaces")
         const space = await client.space.findMany({
             where: {
                 creatorId: req.userId
@@ -177,7 +176,8 @@ export const getMySpace = async (req: Request, res: Response) => {
                 name: true,
                 width: true,
                 height: true,
-                thumbnail: true
+                thumbnail: true,
+                createdAt: true
             }
         })
         const result = space.map(ele => {
