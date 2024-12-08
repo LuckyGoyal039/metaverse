@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { socket } from '../../socket';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import chatBgImage from '../../assets/images/chat-bg-image.png'
-
+import data from '@emoji-mart/data'
+import Picker from '@emoji-mart/react';
+import MoodIcon from '@mui/icons-material/Mood';
 interface Message {
     id: string;
     sender: string;
@@ -18,9 +20,9 @@ interface ChatProps {
 
 const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [chatPlayers, setChatPlayers] = useState<Message[]>([]);
     const [isConnected, setIsConnected] = useState(true);
     const [isJoined, setIsJoined] = useState(true);
+    const [emojiOpen, setEmojiOpen] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const messageInputRef = useRef<HTMLInputElement>(null);
@@ -115,6 +117,7 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
     }, [messages]);
 
     const handleSendMessage = (e: React.FormEvent) => {
+        debugger
         e.preventDefault();
         const messageContent = messageInputRef.current?.value.trim();
 
@@ -161,6 +164,27 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
         });
     };
 
+    const handleEmojiSelect = (emoji: any) => {
+        setEmojiOpen(false); // Close the emoji picker
+        if (messageInputRef.current) {
+            const input = messageInputRef.current;
+            const start = input.selectionStart ?? 0;
+            const end = input.selectionEnd ?? 0;
+            const value = input.value;
+
+            // Insert the emoji at the caret position
+            const newValue =
+                value.slice(0, start) + emoji.native + value.slice(end);
+            input.value = newValue;
+
+            // Move caret after the inserted emoji
+            input.setSelectionRange(start + emoji.native.length, start + emoji.native?.length);
+
+            // Trigger input's onChange or similar event if needed
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+    };
+
     return (
         <div
             className="bg-[#111b21] rounded-lg overflow-hidden flex flex-col h-full"
@@ -185,21 +209,13 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
 
             <div
                 ref={chatContainerRef}
-                className=" overflow-y-auto p-4 space-y-2 h-[82%] overflow-hidden"
+                className=" overflow-y-auto px-1 py-2 space-y-2 h-[82%] overflow-hidden"
                 style={{
                     backgroundImage: `url(${chatBgImage})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                 }}
             >
-                {chatPlayers.map((message, index) => (
-                    <div key={`${message.id}-${index}`} className="w-full flex justify-center overflow-ellipsis">
-                        <p className="text-sm bg-[#202c33] text-gray-400 px-2 rounded-lg text-center ">
-                            {message.content}
-                        </p>
-                    </div>
-
-                ))}
                 {messages.map((message, index) => (
                     message.systemFlag ? (
                         // System Message
@@ -214,26 +230,26 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
                     ) : (
                         <div
                             key={`${message.id}-${index}`}
-                            className={`flex flex-col ${message.sender === playerName ? 'items-end' : 'items-start'}`}
+                            className={`flex flex-col w-full ${message.sender === playerName ? 'items-end' : 'items-start'}`}
                         >
-                            <div className={`flex gap-1 ${message.sender === playerName ? 'flex-row-reverse' : ''}`}>
+                            <div className={`flex gap-1 w-full ${message.sender === playerName ? 'flex-row-reverse' : ''}`}>
                                 <AccountCircleIcon className="text-yellow-500" />
                                 <div
-                                    className={`max-w-[65%] px-2 flex flex-col rounded-lg gap-1 
+                                    className={`max-w-[90%] px-2 flex flex-col rounded-lg gap-1 
                     ${message.sender === playerName
                                             ? 'bg-blue-600 text-white rounded-tr-none'
                                             : 'bg-[#202c33] text-white rounded-tl-none'
                                         }`}
                                 >
                                     {message.sender !== playerName && (
-                                        <span className="font-bold text-lg text-orange-500">
+                                        <span className="font-bold text-xs text-orange-500">
                                             {message.sender}
                                         </span>
                                     )}
-                                    <span className="break-words text-lg">
+                                    <span className="break-words text-sm">
                                         {message.content}
                                     </span>
-                                    <span className="text-xs opacity-75 text-end">
+                                    <span className="text-[0.625rem] opacity-75 text-end">
                                         {formatTimestamp(message.timestamp)}
                                     </span>
                                 </div>
@@ -248,23 +264,41 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
 
             <form
                 onSubmit={handleSendMessage}
-                className="border-t p-3 flex gap-2 items-center h-[10%] overflow-hidden"
+                className="relative border-t p-3 flex gap-2 items-center h-[10%] overflow-visible bg-[#121212]"
             >
-                <input
-                    ref={messageInputRef}
-                    placeholder={
-                        !isConnected ? "Connecting..." :
-                            !isJoined ? "Joining room..." :
-                                "Type a message..."
-                    }
-                    disabled={!isConnected || !isJoined}
-                    className="flex-1 px-3 py-2 border rounded-md disabled:opacity-50 bg-[#202c33] text-white max-h-16 focus:outline-none"
-                    onKeyDown={(event) => {
-                        if (event.code === "Space") {
-                            event.stopPropagation();
+                <div className="relative flex items-center gap-2 flex-1">
+                    <input
+                        ref={messageInputRef}
+                        placeholder={
+                            !isConnected ? "Connecting..." :
+                                !isJoined ? "Joining room..." :
+                                    "Type a message..."
                         }
-                    }}
-                />
+                        disabled={!isConnected || !isJoined}
+                        className="w-full px-3 py-2 border rounded-md disabled:opacity-50 bg-[#202c33] text-white max-h-16 focus:outline-none"
+                        onKeyDown={(event) => {
+                            if (event.code === "Space") {
+                                event.stopPropagation();
+                            }
+                        }}
+                    />
+                    <div className="relative">
+                        <MoodIcon
+                            onClick={() => setEmojiOpen((prev) => !prev)}
+                            className="cursor-pointer text-gray-500 hover:text-gray-300"
+                        />
+                        {emojiOpen && (
+                            <div className="fixed bottom-28 right-4 bg-white shadow-lg border rounded-md h-80 overflow-hidden">
+                                <div className="relative z-2">
+                                    <Picker
+                                        data={data}
+                                        onEmojiSelect={handleEmojiSelect}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
                 <button
                     type="submit"
                     disabled={!isConnected || !isJoined}
