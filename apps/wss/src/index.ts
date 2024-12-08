@@ -40,41 +40,6 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
     console.log('Player connected with socket id:', socket.id);
 
-    //demo room
-    socket.on('joinDemo', (name, callback) => {
-        const room = 'demo-room';
-        socket.join(room);
-        console.log(`${name} joined ${room}`);
-
-        const randomX = Math.floor(Math.random() * 769);
-        const randomY = Math.floor(Math.random() * 449);
-
-        players[socket.id] = {
-            x: randomX,
-            y: randomY,
-            avatarImage: '',
-            name: name || "Unknown",
-            dx: 0,
-            dy: 0
-        };
-
-        // Send join confirmation
-        // callback({ success: true });
-
-        io.to(room).emit('newPlayer', getPlayersInRoom(room));
-        socket.to(room).emit('playerJoined', { id: socket.id, name });
-
-        const systemMessage = {
-            id: Math.random().toString(36).substr(2, 9),
-            sender: 'System',
-            content: `${name} has joined the chat`,
-            timestamp: Date.now()
-        };
-
-        io.to('demo-room').emit('chatMessage', systemMessage);
-    });
-
-    // not working 
     socket.on('joinRoom', ({ room, name }) => {
         socket.join(room);
         console.log(`Player ${name} joined room ${room}`);
@@ -91,11 +56,19 @@ io.on('connection', (socket) => {
             dy: 0
         };
 
-        io.to(room).emit('playerJoined', {
-            room: room,
-            players: getPlayersInRoom(room),
-        });
+        io.to(room).emit('playerJoined',
+            getPlayersInRoom(room));
+
+        const systemMessage = {
+            id: Math.random().toString(36).substr(2, 9),
+            sender: 'System',
+            content: `${name} has joined the chat`,
+            timestamp: Date.now()
+        };
+
+        io.to(room).emit('chatMessage', systemMessage);
     });
+    
     const checkCollisionWithGroup = (squareA: Square, id: string, room: string): boolean => {
         const playersInRoom = getPlayersInRoom(room);
         for (const playerId in playersInRoom) {

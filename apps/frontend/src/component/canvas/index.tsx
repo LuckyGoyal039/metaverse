@@ -36,7 +36,7 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
         const create = function (this: Phaser.Scene) {
             socket.removeAllListeners();
             const scene = sceneRef.current;
-            socket.emit(room == 'demo-room' ? 'joinDemo' : 'joinRoom', { room, name: playerName })
+            socket.emit('joinRoom', { room, name: playerName })
             this.anims.create({
                 key: 'walk-right',
                 frames: this.anims.generateFrameNumbers('player-right', { start: 0, end: 3 }),
@@ -98,7 +98,8 @@ const Canvas: React.FC<CanvasProps> = ({ rows, cols, tile_size, playerName, room
                 scene.camera.startFollow(scene.localPlayer, true, 0.1, 0.1);
             scene.camera.setZoom(1.3)
 
-            socket.on('newPlayer', (players: Record<string, { x: number; y: number }>) => {
+            socket.on('playerJoined', (players: Record<string, { x: number; y: number }>) => {
+                console.log("new player joined: ", players)
                 Object.entries(players).forEach(([id, { x, y }]) => {
                     if (id === socket.id) {
                         scene.localPlayer?.setPosition(x, y);
