@@ -232,6 +232,10 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab, parentReload }) => {
     }
   }
 
+  const navigateTo = (url: string) => {
+    navigate(url)
+  }
+
   useEffect(() => {
     getUserInfo()
   }, [])
@@ -241,9 +245,9 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab, parentReload }) => {
       <nav className="bg-[#333a64] py-3">
         <div className="flex flex-wrap justify-between items-center px-8">
           <div className="flex items-center space-x-6">
-            <a href="/" className="flex items-center">
+            <button onClick={() => navigateTo('/')} >
               <img src={mainLogo} alt="metaverse" className='w-14 h-14' />
-            </a>
+            </button>
             <div className="hidden lg:flex items-center space-x-6">
               <button type='button' className={`flex gap-2 items-center font-bold text-white px-5 py-2 rounded-lg hover:bg-[#4c5381] ${tab == 'event' ? 'bg-[#4c5381] ' : ''}`} onClick={() => setTab("event")}>
                 <CalendarMonthIcon className='!w-4 !h-4' />
@@ -384,15 +388,11 @@ const Header: React.FC<HeaderProps> = ({ tab, setTab, parentReload }) => {
         {menuOpen && (
           <div className="lg:hidden mt-4">
             <ul className="flex flex-col space-y-2">
-              <li>
-                <a href="/events" className="block py-2 px-4 text-white hover:bg-gray-700 rounded-lg">
-                  Events
-                </a>
+              <li onClick={() => navigateTo('/events')} className="block py-2 px-4 text-white hover:bg-gray-700 rounded-lg" >
+                Events
               </li>
-              <li>
-                <a href="/spaces" className="block py-2 px-4 text-white hover:bg-gray-700 rounded-lg">
-                  My Spaces
-                </a>
+              <li onClick={() => navigateTo('/events')} className="block py-2 px-4 text-white hover:bg-gray-700 rounded-lg" >
+                My Spaces
               </li>
             </ul>
           </div>

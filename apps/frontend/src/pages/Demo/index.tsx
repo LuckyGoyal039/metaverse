@@ -5,7 +5,7 @@ import WaitingPage from "../../component/waiting";
 function Demo() {
     const username = useRef<HTMLInputElement>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [data, setData] = useState<any>(null);
+    const [data] = useState<any>(null);
     const [usernameEntered, setUsernameEntered] = useState<boolean>(false);
 
     // const fetchData = async (name: string) => {
