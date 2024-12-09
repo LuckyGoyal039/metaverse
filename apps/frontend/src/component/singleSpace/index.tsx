@@ -8,15 +8,17 @@ interface SingleSpaceProps {
     backgroundImg: string;
     spaceName: string;
     createDate: string;
-    copyUrl: string
+    spaceId: string
 
 }
-const SingleSpace: React.FC<SingleSpaceProps> = ({ backgroundImg, spaceName, createDate, copyUrl }) => {
+const SingleSpace: React.FC<SingleSpaceProps> = ({ backgroundImg, spaceName, createDate, spaceId }) => {
     const [isHovered, setIsHovered] = useState(false);
     const navigate = useNavigate();
     const handleCopy = async () => {
         try {
-            await navigator.clipboard.writeText(copyUrl);
+            const baseUrl = window.location.origin
+            const link = `${baseUrl}/join-space?id=${spaceId}`
+            await navigator.clipboard.writeText(link);
             toast.success("Link Copied to clipboard!", {
                 position: 'bottom-right'
             })
@@ -29,12 +31,8 @@ const SingleSpace: React.FC<SingleSpaceProps> = ({ backgroundImg, spaceName, cre
     };
     const handleJoinRoom = () => {
         try {
-            const HTTP_SERVER = import.meta.env.VITE_HTTP_SERVER_URL
-            const url = `/join-space?id='${copyUrl}'`
+            const url = `/join-space?id=${spaceId}`
             navigate(url);
-            // toast.success("Join Space Functionality is unavailable", {
-            //     position: "top-center"
-            // })
         } catch (err) {
             toast.error("unable to join room", {
                 position: "top-center"
@@ -48,11 +46,9 @@ const SingleSpace: React.FC<SingleSpaceProps> = ({ backgroundImg, spaceName, cre
         const month = new Intl.DateTimeFormat('en-US', options).format(date);
         const day = String(date.getDate()).padStart(2, '0');
         const year = date.getFullYear();
-
         return `${month}, ${day} ${year}`;
-
-        return `${day}-${month}-${year}`;
     };
+    
     return (
         <div className='flex flex-col gap-2'>
             <div

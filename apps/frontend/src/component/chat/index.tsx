@@ -86,15 +86,9 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
             socket.connect();
         }
         socket.onAny((message, ...arg) => {
-            debugger
             if (message !== 'chatMessage') return
             const messObj = arg[0]
             console.log('Message received:', messObj);
-            // if (messObj.systemFlag) {
-            //     console.log("system message");
-            //     setChatPlayers(prev => [...prev, messObj])
-            //     return;
-            // }
             if (messObj.sender !== playerName) {
                 setMessages(prev => [...prev, messObj]);
             }
@@ -108,6 +102,14 @@ const Chat: React.FC<ChatProps> = ({ playerName, room }) => {
             socket.off('connect', onConnect);
             socket.off('disconnect', onDisconnect);
             socket.off('connect_error', onConnectError);
+            socket.offAny((message, ...arg) => {
+                if (message !== 'chatMessage') return
+                const messObj = arg[0]
+                console.log('Message received:', messObj);
+                if (messObj.sender !== playerName) {
+                    setMessages(prev => [...prev, messObj]);
+                }
+            });
             // socket.off('chatMessage', onChatMessage);
         };
     }, [playerName]);

@@ -68,7 +68,6 @@ const MySpace: React.FC = () => {
                 < div className="w-full h-[85vh] flex items-center justify-center">
                     <NothingFound message="You haven't visited any spaces. Create a Space to get started!" />
                 </div >
-
             }
             {
                 !filterData.length && mySpaces.length && <h1>No data found</h1>
@@ -79,8 +78,8 @@ const MySpace: React.FC = () => {
             {
                 filterData && <div className="w-full pt-2">
                     <ul className="w-full flex gap-12 flex-wrap pl-12">
-                        {filterData.map((user: mySpaceInterface) => (
-                            <SingleSpace key={user.id} backgroundImg={'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTh5bElz8R6LVIgd6GDEpC29hrva1ql4TCNqA&s'} spaceName={user.name} createDate={user.createdAt} copyUrl="somedandomurl" />
+                        {filterData.map((spaceEle: mySpaceInterface) => (
+                            <SingleSpace key={spaceEle.id} backgroundImg={'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTh5bElz8R6LVIgd6GDEpC29hrva1ql4TCNqA&s'} spaceName={spaceEle.name} createDate={spaceEle.createdAt} spaceId={spaceEle.id} />
                         ))}
                     </ul>
                 </div>

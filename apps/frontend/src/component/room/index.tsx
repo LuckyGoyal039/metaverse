@@ -2,14 +2,14 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import SpaceArena from "../../component/spaceArena";
 import WaitingPage from "../../component/waiting";
-import { toast } from 'react-toastify';
+// import { toast } from 'react-toastify';
 
 const Room: React.FC = () => {
     const navigate = useNavigate()
-    const [searchParams, _] = useSearchParams();
+    const [searchParams] = useSearchParams();
     const username = useRef<HTMLInputElement>(null);
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [data, setData] = useState<any>(null);
+    const [data] = useState<any>(null);
     const [usernameEntered, setUsernameEntered] = useState<boolean>(false);
 
     // const fetchData = async (name: string) => {
@@ -29,7 +29,7 @@ const Room: React.FC = () => {
         setIsLoading(true);
         try {
             const HTTP_SERVER = import.meta.env.VITE_HTTP_SERVER_URL
-            const url = `${HTTP_SERVER}/is-login'`
+            const url = `${HTTP_SERVER}/is-login`
             const token = localStorage.getItem("token")
             await fetch(url, {
                 method: "GET",
@@ -43,6 +43,26 @@ const Room: React.FC = () => {
             setIsLoading(false);
         }
     }
+    // const checkSpaceExist = async () => {
+    //     try {
+    //         const HTTP_SERVER = import.meta.env.VITE_HTTP_SERVER_URL
+    //         const url = `${HTTP_SERVER}/checkSpace`
+    //         const token = localStorage.getItem("token")
+    //         const data = {
+    //             spaceId: searchParams.get('id')
+    //         }
+    //         const res = await fetch(url, {
+    //             method: "POST",
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //             },
+    //             body: JSON.stringify(data),
+    //         });
+
+    //     } catch (err) {
+    //         console.log("spaceid validation failed: ", err)
+    //     }
+    // }
 
     const handleNext = () => {
         if (typeof username.current?.value === 'string' && username.current?.value) {
@@ -60,6 +80,7 @@ const Room: React.FC = () => {
     }, [data]);
     useEffect(() => {
         checkLogin()
+        // checkSpaceExist()
     }, []);
     return (
         <>
