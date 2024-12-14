@@ -29,9 +29,7 @@ let players: Record<string, Player> = {}
 const server = http.createServer(app)
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:5173",
-        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        credentials: true
+        origin: "*"
     },
     pingInterval: 2000,
     pingTimeout: 4000,
